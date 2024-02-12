@@ -1,0 +1,7 @@
+# 忽略配置文件
+.settings/
+.vs/
+.vscode/
+# 忽略编译生成的文件
+build/
+Debug/
