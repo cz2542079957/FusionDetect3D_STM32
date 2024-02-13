@@ -21,6 +21,7 @@ target_compile_definitions(
 target_include_directories(
     ${TARGET_NAME} PRIVATE
     "$<$<AND:$<CONFIG:Debug>,$<COMPILE_LANGUAGE:C>>:${PROJECT_SOURCE_DIR}/Core/Inc>"
+    "$<$<AND:$<CONFIG:Debug>,$<COMPILE_LANGUAGE:C>>:${PROJECT_SOURCE_DIR}/Core/Inc/BSP>"
     "$<$<AND:$<CONFIG:Debug>,$<COMPILE_LANGUAGE:C>>:${PROJECT_SOURCE_DIR}/Drivers/STM32F1xx_HAL_Driver/Inc/Legacy>"
     "$<$<AND:$<CONFIG:Debug>,$<COMPILE_LANGUAGE:C>>:${PROJECT_SOURCE_DIR}/Drivers/STM32F1xx_HAL_Driver/Inc>"
     "$<$<AND:$<CONFIG:Debug>,$<COMPILE_LANGUAGE:C>>:${PROJECT_SOURCE_DIR}/Drivers/CMSIS/Device/ST/STM32F1xx/Include>"
@@ -79,6 +80,8 @@ target_link_options(
 
 target_sources(
     ${TARGET_NAME} PRIVATE
+    "Core/Src/BSP/beep.c"
+    "Core/Src/BSP/led.c"
     "Core/Src/main.c"
     "Core/Src/stm32f1xx_hal_msp.c"
     "Core/Src/stm32f1xx_it.c"
@@ -98,6 +101,7 @@ target_sources(
     "Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_rcc.c"
     "Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim_ex.c"
     "Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_tim.c"
+    "Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_uart.c"
     "Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal.c"
 )
 
