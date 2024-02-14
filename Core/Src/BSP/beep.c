@@ -11,7 +11,7 @@ struct Beep_States {
 uint16_t beep_states_head = 0;
 uint16_t beep_states_tail = 0;
 uint16_t beep_states_size = 0;
-void beep_states_push(int state, int time) {
+void beep_states_push(uint16_t state, int16_t time) {
   if (beep_states_size == BEEP_MAX_STATES)
     return;
   beep_states[beep_states_tail].state = state;
@@ -31,10 +31,9 @@ void beep_on() { HAL_GPIO_WritePin(BEEP_GPIO_Port, BEEP_Pin, GPIO_PIN_SET); }
 
 void beep_off() { HAL_GPIO_WritePin(BEEP_GPIO_Port, BEEP_Pin, GPIO_PIN_RESET); }
 
-void beep_once(int time) {
-  beep_on();
-  HAL_Delay(time);
-  beep_off();
+void beep_once(int16_t time) {
+  beep_states_push(BEEP_STATE_ON, time);
+  beep_states_push(BEEP_STATE_OFF, time);
 }
 
 /*public*/
@@ -49,16 +48,14 @@ void beep_init() {
 }
 
 void beep_sound_start() {
-  beep_states_push(BEEP_STATE_ON, 200);
-  beep_states_push(BEEP_STATE_OFF, 200);
-  beep_states_push(BEEP_STATE_ON, 200);
-  beep_states_push(BEEP_STATE_OFF, 200);
-  beep_states_push(BEEP_STATE_ON, 200);
-  beep_states_push(BEEP_STATE_OFF, 200);
+  beep_once(200);
+  beep_once(200);
+  beep_once(200);
 }
 
 void beep_sound_end() {
   //结束音效
+  beep_once(400);
 }
 
 void beep_on_time(uint16_t interval) {

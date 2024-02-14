@@ -44,11 +44,11 @@ void led_init() {
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 }
 
-void led_keep_on() { led_states_push(LED_STATE_ON, 100); }
+void led_keep_on() { led_states_push(LED_STATE_ON, 10); }
 
 void led_delay(uint16_t time) {
   led_states_push(LED_STATE_ON, time);
-  led_states_push(LED_STATE_OFF, 100);
+  led_states_push(LED_STATE_OFF, 10);
 }
 void led_flash(uint16_t num) {
   for (uint16_t i = 0; i < num; i++) {

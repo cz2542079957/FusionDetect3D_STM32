@@ -22,13 +22,13 @@ void key1_init() {
 }
 
 void key1_on_time(uint16_t interval) {
-  if (state == KEY1_RELEASE) {
-    printf("debug: release\n");
-  } else if (state == KEY1_LONG_PRESS) {
-    printf("debug: long press\n");
-  } else {
-    printf("debug: press\n");
-  }
+  // if (state == KEY1_RELEASE) {
+  //   printf("debug: release\n");
+  // } else if (state == KEY1_LONG_PRESS) {
+  //   printf("debug: long press\n");
+  // } else {
+  //   printf("debug: press\n");
+  // }
   if (key1_is_pressed()) {
     //按下状态
     current_press_time += interval;

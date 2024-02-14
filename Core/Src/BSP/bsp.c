@@ -13,6 +13,22 @@ void bsp_init() {
   beep_init();
 }
 
+//各硬件功能融合组成服务
+void on_time_service() {
+  //按键key1短按、长按功能
+  static uint8_t last_key1_state = KEY1_RELEASE;
+  if (key1_get_state() == KEY1_PRESS) {
+    //检测为按下
+    beep_once(30);
+  } else if (key1_get_state() == KEY1_LONG_PRESS &&
+             last_key1_state != KEY1_LONG_PRESS) {
+    //检测长按
+    led_flash_with_interval(10, 30);
+    led_keep_on();
+  }
+  last_key1_state = key1_get_state();
+}
+
 void on_time(uint16_t interval) {
   // led
   led_on_time(interval);
@@ -22,9 +38,12 @@ void on_time(uint16_t interval) {
   key1_on_time(interval);
   // uart
   uart_on_time(interval);
-
+  // 串口数据解析
   uart_data_paser();
   uart_data_publisher();
+
+  // 服务
+  on_time_service();
 }
 
 //用于解析串口命令
