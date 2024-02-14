@@ -18,6 +18,8 @@ void on_time(uint16_t interval) {
   led_on_time(interval);
   // beep
   beep_on_time(interval);
+  // key1
+  key1_on_time(interval);
   // uart
   uart_on_time(interval);
 

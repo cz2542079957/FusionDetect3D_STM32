@@ -1,14 +1,16 @@
 #include "key1.h"
+#include "stdio.h"
+
 //当前状态(上一帧状态)
-int state = KEY1_RELEASE;
+uint8_t state = KEY1_RELEASE;
 //当前按下的时间
-int current_press_time = 0;
+uint16_t current_press_time = 0;
 
 int key1_is_pressed() {
   return (HAL_GPIO_ReadPin(KEY1_GPIO_Port, KEY1_Pin) == GPIO_PIN_RESET);
 }
 
-int key1_get_state() { return state; }
+uint8_t key1_get_state() { return state; }
 
 void key1_init() {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -20,19 +22,29 @@ void key1_init() {
 }
 
 void key1_on_time(uint16_t interval) {
+  if (state == KEY1_RELEASE) {
+    printf("debug: release\n");
+  } else if (state == KEY1_LONG_PRESS) {
+    printf("debug: long press\n");
+  } else {
+    printf("debug: press\n");
+  }
   if (key1_is_pressed()) {
     //按下状态
-    if (state == KEY1_RELEASE) {
-      state = KEY1_PRESS;
-      current_press_time = 0;
-    } else if (state == KEY1_PRESS) {
-      current_press_time += interval;
-      if (current_press_time >= KEY1_LONG_PRESS_TIME) {
-        state = KEY1_LONG_PRESS;
-      }
+    current_press_time += interval;
+    //判定为长按
+    if (current_press_time >= KEY1_LONG_PRESS_TIME) {
+      state = KEY1_LONG_PRESS;
     }
   } else {
-    //按键松开
-    state = KEY1_RELEASE;
+    //判定为短按
+    if (current_press_time < KEY1_LONG_PRESS_TIME && current_press_time > 0) {
+      state = KEY1_PRESS;
+    }
+    //判定松开
+    if (current_press_time == 0) {
+      state = KEY1_RELEASE;
+    }
+    current_press_time = 0;
   }
 }

@@ -11,11 +11,11 @@
 #define KEY1_LONG_PRESS 2
 
 //长按时间
-#define KEY1_LONG_PRESS_TIME 30
+#define KEY1_LONG_PRESS_TIME 200
 
 //初始化
 void key1_init();
 //获取状态
-int key1_get_state();
+uint8_t key1_get_state();
 //轮询函数
 void key1_on_time(uint16_t interval);
