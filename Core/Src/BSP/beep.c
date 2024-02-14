@@ -22,9 +22,9 @@ void beep_init() {
 
 void beep_sound_start() {
   beep_once(200);
-  HAL_Delay(300);
+  HAL_Delay(200);
   beep_once(200);
-  HAL_Delay(300);
+  HAL_Delay(200);
   beep_once(200);
 }
 
