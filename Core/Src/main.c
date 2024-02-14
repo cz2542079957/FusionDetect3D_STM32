@@ -23,6 +23,7 @@ int main(void) {
   bsp_init();
 
   beep_sound_start();
+  led_flash(20);
   led_keep_on();
   while (1) {
     // uint8_t ch[] = {0xff, 0x11, 0x22, 0x33};
