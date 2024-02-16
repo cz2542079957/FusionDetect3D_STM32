@@ -1,9 +1,6 @@
 #include "beep.h"
 
-/*基本状态管理 数据结构*/
-#define BEEP_MAX_STATES 128u
-#define BEEP_STATE_ON 1
-#define BEEP_STATE_OFF 0
+/*基本状态管理 数据结构*/ 
 struct Beep_States {
   uint16_t state; //状态
   int16_t time;   //持续时间

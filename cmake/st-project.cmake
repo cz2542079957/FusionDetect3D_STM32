@@ -81,7 +81,11 @@ target_link_options(
 target_sources(
     ${TARGET_NAME} PRIVATE
     "Core/Src/BSP/beep.c"
+    "Core/Src/BSP/bsp.c"
+    "Core/Src/BSP/key1.c"
     "Core/Src/BSP/led.c"
+    "Core/Src/BSP/motor.c"
+    "Core/Src/BSP/uart.c"
     "Core/Src/main.c"
     "Core/Src/stm32f1xx_hal_msp.c"
     "Core/Src/stm32f1xx_it.c"
