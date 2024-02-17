@@ -1,4 +1,5 @@
 #include "uart.h"
+#include <string.h>
 
 UART_HandleTypeDef huart1;
 DMA_HandleTypeDef hdma_usart1_tx;
@@ -34,7 +35,6 @@ void uart_dma_init()
     hdma_usart1_tx.Init.Priority = DMA_PRIORITY_LOW;
     if (HAL_DMA_Init(&hdma_usart1_tx) != HAL_OK)
     {
-        Error_Handler();
     }
     // 开启dma中断
     HAL_NVIC_SetPriority(DMA1_Channel4_IRQn, 1, 0);
@@ -111,13 +111,6 @@ void uart_data_handler()
 
 void uart_on_time(uint16_t interval)
 {
-    // __HAL_UART_CLEAR_OREFLAG(&huart1);
-    // uint8_t data;
-    // while (HAL_UART_Receive(&huart1, data, 1, 10000) == HAL_OK) {
-    //   uart_recv(data);
-    // }
-    // uart_data_handler();
-
     // printf("out:%d \r\n", uart_buffer.size);
 }
 

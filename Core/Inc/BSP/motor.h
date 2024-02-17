@@ -58,7 +58,7 @@ typedef enum
     // 电机死区校正值
     MOTOR_IGNORE_PULSE = 2000,
     // 速度变化率
-    MOTOR_SPEED_RATE = 10,
+    MOTOR_SPEED_INCREMENT = 10,
     MOTOR_FRONT = 1,
     MOTOR_BACK = -1,
     MOTOR_STOP = 0
@@ -71,24 +71,3 @@ void motor_stop();
 // 设置电机脉冲(0-1600)
 void motor_set_pwm(Motor_ID id, int16_t pulse);
 void motor_set_all_pwm(int16_t pulse);
-//  设置电机运动方向
-void motor_set_move(Motor_ID id, Motor_Move direction);
-void motor_set_all_move(Motor_Move direction);
-
-// 运动状态
-typedef enum
-{
-    MOTION_FORWARD,
-    MOTION_BACKWARD,
-    MOTION_LEFT,
-    MOTION_RIGHT,
-    MOTION_STOP
-} Motion_State;
-// 运动控制(速度值0-100)
-void motion_go_forward(int16_t speed);
-void motion_go_backward(int16_t speed);
-void motion_go_left(int16_t speed);
-void motion_go_right(int16_t speed);
-void motion_stop();
-// 轮询函数
-void motion_on_time(uint16_t interval);

@@ -22,6 +22,7 @@ target_include_directories(
     ${TARGET_NAME} PRIVATE
     "$<$<AND:$<CONFIG:Debug>,$<COMPILE_LANGUAGE:C>>:${PROJECT_SOURCE_DIR}/Core/Inc>"
     "$<$<AND:$<CONFIG:Debug>,$<COMPILE_LANGUAGE:C>>:${PROJECT_SOURCE_DIR}/Core/Inc/BSP>"
+    "$<$<AND:$<CONFIG:Debug>,$<COMPILE_LANGUAGE:C>>:${PROJECT_SOURCE_DIR}/Core/Inc/Service>"
     "$<$<AND:$<CONFIG:Debug>,$<COMPILE_LANGUAGE:C>>:${PROJECT_SOURCE_DIR}/Drivers/STM32F1xx_HAL_Driver/Inc/Legacy>"
     "$<$<AND:$<CONFIG:Debug>,$<COMPILE_LANGUAGE:C>>:${PROJECT_SOURCE_DIR}/Drivers/STM32F1xx_HAL_Driver/Inc>"
     "$<$<AND:$<CONFIG:Debug>,$<COMPILE_LANGUAGE:C>>:${PROJECT_SOURCE_DIR}/Drivers/CMSIS/Device/ST/STM32F1xx/Include>"
@@ -87,8 +88,8 @@ target_sources(
     "Core/Src/BSP/motor.c"
     "Core/Src/BSP/uart.c"
     "Core/Src/main.c"
+    "Core/Src/Service/service_motion.c"
     "Core/Src/stm32f1xx_hal_msp.c"
-    "Core/Src/stm32f1xx_it.c"
     "Core/Src/syscalls.c"
     "Core/Src/sysmem.c"
     "Core/Src/system_stm32f1xx.c"
