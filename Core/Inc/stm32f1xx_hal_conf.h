@@ -1,41 +1,10 @@
-/* USER CODE BEGIN Header */
-/**
- ******************************************************************************
- * @file    stm32f1xx_hal_conf.h
- * @brief   HAL configuration file.
- ******************************************************************************
- * @attention
- *
- * Copyright (c) 2017 STMicroelectronics.
- * All rights reserved.
- *
- * This software is licensed under terms that can be found in the LICENSE file
- * in the root directory of this software component.
- * If no LICENSE file comes with this software, it is provided AS-IS.
- *
- ******************************************************************************
- */
-/* USER CODE END Header */
-
-/* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __STM32F1xx_HAL_CONF_H
 #define __STM32F1xx_HAL_CONF_H
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
-    /* Exported types ------------------------------------------------------------*/
-    /* Exported constants --------------------------------------------------------*/
-
-    /* ########################## Module Selection ############################## */
-    /**
-     * @brief This is the list of modules to be used in the HAL driver
-     */
+/* ########################## Module Selection ############################## */
 
 #define HAL_MODULE_ENABLED
-    /*#define HAL_ADC_MODULE_ENABLED   */
+/*#define HAL_ADC_MODULE_ENABLED   */
 /*#define HAL_CRYP_MODULE_ENABLED   */
 /*#define HAL_CAN_MODULE_ENABLED   */
 /*#define HAL_CAN_LEGACY_MODULE_ENABLED   */
@@ -63,12 +32,12 @@ extern "C"
 /*#define HAL_MMC_MODULE_ENABLED   */
 /*#define HAL_SDRAM_MODULE_ENABLED   */
 /*#define HAL_SMARTCARD_MODULE_ENABLED   */
-/*#define HAL_SPI_MODULE_ENABLED   */
+#define HAL_SPI_MODULE_ENABLED
 /*#define HAL_SRAM_MODULE_ENABLED   */
 #define HAL_TIM_MODULE_ENABLED
 #define HAL_UART_MODULE_ENABLED
-    /*#define HAL_USART_MODULE_ENABLED   */
-    /*#define HAL_WWDG_MODULE_ENABLED   */
+/*#define HAL_USART_MODULE_ENABLED   */
+/*#define HAL_WWDG_MODULE_ENABLED   */
 
 #define HAL_CORTEX_MODULE_ENABLED
 #define HAL_DMA_MODULE_ENABLED
@@ -195,7 +164,7 @@ extern "C"
 #define PHY_READ_TO 0x0000FFFFU
 #define PHY_WRITE_TO 0x0000FFFFU
 
-    /* Section 3: Common PHY Registers */
+/* Section 3: Common PHY Registers */
 
 #define PHY_BCR ((uint16_t)0x00) /*!< Transceiver Basic Control Register   */
 #define PHY_BSR ((uint16_t)0x01) /*!< Transceiver Basic Status Register    */
@@ -221,19 +190,19 @@ extern "C"
 #define PHY_SPEED_STATUS ((uint16_t)0x0002U)  /*!< PHY Speed mask                                  */
 #define PHY_DUPLEX_STATUS ((uint16_t)0x0004U) /*!< PHY Duplex mask                                 */
 
-    /* ################## SPI peripheral configuration ########################## */
+/* ################## SPI peripheral configuration ########################## */
 
-    /* CRC FEATURE: Use to activate CRC feature inside HAL SPI Driver
-     * Activated: CRC code is present inside driver
-     * Deactivated: CRC code cleaned from driver
-     */
+/* CRC FEATURE: Use to activate CRC feature inside HAL SPI Driver
+ * Activated: CRC code is present inside driver
+ * Deactivated: CRC code cleaned from driver
+ */
 
 #define USE_SPI_CRC 0U
 
-    /* Includes ------------------------------------------------------------------*/
-    /**
-     * @brief Include module's header file
-     */
+/* Includes ------------------------------------------------------------------*/
+/**
+ * @brief Include module's header file
+ */
 
 #ifdef HAL_RCC_MODULE_ENABLED
 #include "stm32f1xx_hal_rcc.h"
@@ -378,8 +347,8 @@ extern "C"
  * @retval None
  */
 #define assert_param(expr) ((expr) ? (void)0U : assert_failed((uint8_t *)__FILE__, __LINE__))
-    /* Exported functions ------------------------------------------------------- */
-    void assert_failed(uint8_t *file, uint32_t line);
+/* Exported functions ------------------------------------------------------- */
+void assert_failed(uint8_t *file, uint32_t line);
 #else
 #define assert_param(expr) ((void)0U)
 #endif /* USE_FULL_ASSERT */

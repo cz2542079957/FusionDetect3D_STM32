@@ -111,10 +111,10 @@ int _isatty(int file)
 
 int _lseek(int file, int ptr, int dir)
 {
-  (void)file;
-  (void)ptr;
-  (void)dir;
-  return 0;
+	  (void)file;
+	  (void)ptr;
+	  (void)dir;
+	  return 0;
 }
 
 int _open(char *path, int flags, ...)

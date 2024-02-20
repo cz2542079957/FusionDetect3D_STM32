@@ -89,7 +89,6 @@ target_sources(
     "Core/Src/BSP/uart.c"
     "Core/Src/main.c"
     "Core/Src/Service/service_motion.c"
-    "Core/Src/stm32f1xx_hal_msp.c"
     "Core/Src/syscalls.c"
     "Core/Src/sysmem.c"
     "Core/Src/system_stm32f1xx.c"
