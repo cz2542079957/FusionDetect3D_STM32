@@ -24,8 +24,8 @@
 // 不可大于65535 因为F103的定时器是16位的。
 #define ENCODER_TIM_PERIOD (uint16_t)(65535)
 
-void Encoder_Init(void);
-int Encoder_Get_Count_Now(uint8_t Motor_id);
-void Encoder_Update_Count(void);
-void Encoder_Get_ALL(int *Encoder_all);
-void Encoder_Send_Count_Now(void);
+void encoder_init();
+// int Encoder_Get_Count_Now(uint8_t Motor_id);
+// void Encoder_Update_Count();
+// void Encoder_Get_ALL(int *Encoder_all);
+// void Encoder_Send_Count_Now();

@@ -11,7 +11,6 @@ void uart_data_paser();
 // 用于打包发送各种数据
 void uart_data_publisher();
 
-
 /*public*/
 void bsp_init()
 {
@@ -25,12 +24,15 @@ void bsp_init()
     beep_init();
     // motor初始化
     motor_init();
+    // 编码器初始化
+    encoder_init();
+
     // icm20948初始化
 
     icm20948_return_code_t ret = ICM20948_RET_OK;
     icm20948_settings_t settings;
-    icm20948_gyro_t gyro_data;
-    icm20948_accel_t accel_data;
+//    icm20948_gyro_t gyro_data;
+//    icm20948_accel_t accel_data;
 
     // Init the device function pointers
     ret = icm20948_init(usr_read, usr_write, usr_delay_us);
@@ -49,15 +51,15 @@ void bsp_init()
         ret = icm20948_applySettings(&settings);
     }
 
-    while (1)
-    {
-        // Retrieve the Gyro data and store it in our gyro_data struct
-        // Output is in dps (Degress per second)
-        ret |= icm20948_getGyroData(&gyro_data);
-        // Retrieve the Accel data and store it in our accel_data struct
-        // Output is in mG
-        ret |= icm20948_getAccelData(&accel_data);
-    }
+    // while (1)
+    // {
+    //     // Retrieve the Gyro data and store it in our gyro_data struct
+    //     // Output is in dps (Degress per second)
+    //     ret |= icm20948_getGyroData(&gyro_data);
+    //     // Retrieve the Accel data and store it in our accel_data struct
+    //     // Output is in mG
+    //     ret |= icm20948_getAccelData(&accel_data);
+    // }
 }
 void on_time(uint16_t interval)
 {

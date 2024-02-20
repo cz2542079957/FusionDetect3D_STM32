@@ -1,9 +1,8 @@
 #pragma once
 
+#include <stdio.h>
 #include "bsp.h"
-#include "stm32f1xx_hal.h"
-
-void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+#include "stm32f1xx.h"
 
 void Error_Handler(void);
 

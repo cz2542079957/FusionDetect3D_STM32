@@ -5,6 +5,7 @@
 #include "key1.h"
 #include "led.h"
 #include "icm20948_api.h"
+#include "encoder.h"
 
 #include "service_motion.h"
 
@@ -27,6 +28,7 @@ typedef enum
     FRAME_FUNC_LED_KEEP_OFF = 0x22,     // LED 熄灭
     FRAME_FUNC_LED_FLASH = 0x23,        // LED 闪烁
     FRAME_FUNC_MOTION = 0x61,           // 小车运动控制
+    FRAME_FUNC_ENCODER = 0X71,          // 编码器
 
 } Frame_Func_Flag;
 
