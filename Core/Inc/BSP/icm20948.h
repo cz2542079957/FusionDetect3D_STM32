@@ -741,13 +741,5 @@ typedef struct
 
 typedef struct
 {
-    icm20948_read_fptr_t read;
-    icm20948_write_fptr_t write;
-    icm20948_delay_us_fptr_t delay_us;
-} icm20948_dev_intf_t;
-
-typedef struct
-{
-    icm20948_dev_intf_t intf;
     icm20948_usr_bank_t usr_bank;
 } icm20948_dev_t;

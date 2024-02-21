@@ -1,205 +1,68 @@
-/****************************************************************************
-    ICM-20948 9-Axis MEMS Motion Tracking Device Driver
-
-    Copyright (C) 2020 Stephen Murphy - github.com/stephendpmurphy
-
-    Permission is hereby granted, free of charge, to any person obtaining a copy
-    of this software and associated documentation files (the "Software"), to deal
-    in the Software without restriction, including without limitation the rights
-    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-    copies of the Software, and to permit persons to whom the Software is
-    furnished to do so, subject to the following conditions:
-
-    The above copyright notice and this permission notice shall be included in all
-    copies or substantial portions of the Software.
-
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-    SOFTWARE.
-****************************************************************************/
-
-/*! @file icm20948.c
- * @brief Source file for the ICM20948 9-Axis MEMS device driver.
- */
 
 #include <string.h>
 #include "icm20948.h"
 #include "icm20948_spi.h"
 
-/*! @brief Structure holding reference to our interface functions
-and the ICM20948 register values */
 static icm20948_dev_t dev;
-
-/*! @brief Current settings applied to the device */
 static icm20948_settings_t settings;
 
-int8_t usr_write(uint8_t addr, uint8_t *data, uint32_t len)
+return_code_t icm20948_init()
 {
-    GPIO_TypeDef *CS_port = GPIOB;
-    uint16_t CS_pin = GPIO_PIN_12;
+    return_code_t ret = RETURN_OK;
 
-    HAL_GPIO_WritePin(CS_port, CS_pin, GPIO_PIN_RESET); // 下拉CS信号开始传输
+    // SPI 初始化
+    ret = icm20948_spi_init();
 
-    // 构造发送数据缓冲区
-    uint8_t tx_buffer[len + 1];
-    tx_buffer[0] = addr;
-    memcpy(&tx_buffer[1], data, len);
-
-    // 执行SPI传输
-    HAL_StatusTypeDef status = HAL_SPI_Transmit(&hspi2, tx_buffer, len + 1, 0xffff);
-
-    HAL_GPIO_WritePin(CS_port, CS_pin, GPIO_PIN_SET); // 上拉CS信号结束传输
-
-    if (status != HAL_OK)
-    {
-        return ICM20948_RET_GEN_FAIL;
-    }
-
-    return ICM20948_RET_OK;
-}
-
-int8_t usr_read(uint8_t addr, uint8_t *data, uint32_t len)
-{
-    GPIO_TypeDef *CS_port = GPIOB;
-    uint16_t CS_pin = GPIO_PIN_12;
-
-    HAL_GPIO_WritePin(CS_port, CS_pin, GPIO_PIN_RESET); // 下拉CS信号开始传输
-
-    // 构造带有读标志的地址
-    uint8_t tx_buffer[1];
-    tx_buffer[0] = addr | (0x01 << 7);
-
-    // 先发送带读标志的地址
-    HAL_StatusTypeDef status = HAL_SPI_Transmit(&hspi2, tx_buffer, 1, 0xffff);
-
-    if (status != HAL_OK)
-    {
-        HAL_GPIO_WritePin(CS_port, CS_pin, GPIO_PIN_SET); // 上拉CS信号结束传输
-        return ICM20948_RET_GEN_FAIL;
-    }
-
-    // 接收数据
-    status = HAL_SPI_Receive(&hspi2, data, len, 0xffff);
-
-    HAL_GPIO_WritePin(CS_port, CS_pin, GPIO_PIN_SET); // 上拉CS信号结束传输
-
-    if (status != HAL_OK)
-    {
-        return ICM20948_RET_GEN_FAIL;
-    }
-
-    return ICM20948_RET_OK;
-}
-
-void usr_delay_us(uint32_t period)
-{
-    HAL_Delay((period / 1000)); // HAL_Delay以ms为单位，因此我们需要将us转换为ms
-}
-
-/*!
- * @brief This API reads data via spi while also setting the Read bit on the address,
- * using the provided interface function
- *
- * @param[in] addr: Reg address to read from
- * @param[in] data: Pointer to the buffer we want to read data into
- * @param[in] len: Length of data to be read
- *
- * @return Returns the read status
- */
-static icm20948_return_code_t _spi_read(uint8_t addr, uint8_t *data, uint32_t len)
-{
-    return dev.intf.read((addr | (0x01 << 7)), data, len);
-}
-
-/*!
- * @brief This API sends data via spi using the provided interface function
- *
- * @param[in] addr: Reg address to written from
- * @param[in] data: Pointer to the buffer we want to write data from
- * @param[in] len: Length of data to be written
- *
- * @return Returns the write status
- */
-static icm20948_return_code_t _spi_write(uint8_t addr, uint8_t *data, uint32_t len)
-{
-    return dev.intf.write(addr, data, len);
-}
-
-/*!
- * @brief This API initializes the ICM20948 comms interface, and then does a read from the device
- * to verify working comms
- */
-icm20948_return_code_t icm20948_init(icm20948_read_fptr_t r, icm20948_write_fptr_t w, icm20948_delay_us_fptr_t delay)
-{
-
-    icm20948_spi_init();
-
-    icm20948_return_code_t ret = ICM20948_RET_OK;
-
-    // Verify that the function pointers given to us are not invalid
-    if ((r == NULL) || (w == NULL) || (delay == NULL))
-    {
-        // One of the functions given to us was a NULL pointer, return with a
-        // NULL PTR return code
-        ret = ICM20948_RET_NULL_PTR;
-    }
-
-    // Store the interface functions passed in to us to be used to
-    // communicate with the IC.
-    dev.intf.read = r;
-    dev.intf.write = w;
-    dev.intf.delay_us = delay;
-
-    // Select user register bank 0
     dev.usr_bank.reg_bank_sel = ICM20948_USER_BANK_0;
-
-    if (ret == ICM20948_RET_OK)
+    if (ret == RETURN_OK)
     {
-        // Write to the reg bank select to select bank 0
-        ret = _spi_write(ICM20948_ADDR_REG_BANK_SEL, (uint8_t *)&dev.usr_bank.reg_bank_sel, 0x01);
+        // 选择用户寄存器bank0
+        ret = icm20948_spi_write(ICM20948_ADDR_REG_BANK_SEL, (uint8_t *)&dev.usr_bank.reg_bank_sel, 0x01);
     }
 
-    if (ret == ICM20948_RET_OK)
+    if (ret == RETURN_OK)
     {
-        // Ensure the local WHO_AM_I value is zeroed out before reading it from the chip
+        // 初始化为0，再读取
         dev.usr_bank.bank0.bytes.WHO_AM_I = 0x00;
 
-        // If the bank was selected, read the WHO_AM_I register
-        ret = _spi_read(ICM20948_ADDR_WHO_AM_I, &dev.usr_bank.bank0.bytes.WHO_AM_I, 0x01);
+        // 读取WHO_AM_I寄存器
+        ret = icm20948_spi_read(ICM20948_ADDR_WHO_AM_I, &dev.usr_bank.bank0.bytes.WHO_AM_I, 0x01);
 
-        if (ret == ICM20948_RET_OK)
+        // Device ID 错误
+        if (dev.usr_bank.bank0.bytes.WHO_AM_I != ICM20948_WHO_AM_I_DEFAULT)
         {
-            if (dev.usr_bank.bank0.bytes.WHO_AM_I != ICM20948_WHO_AM_I_DEFAULT)
-            {
-                // The WHO_AM_I ID was incorrect.
-                ret = ICM20948_RET_GEN_FAIL;
-            }
+            ret = RETURN_GEN_FAIL;
         }
     }
 
-    if (ret == ICM20948_RET_OK)
+    if (ret == RETURN_OK)
     {
-        // Set the clock to best available
         dev.usr_bank.bank0.bytes.PWR_MGMT_1.bits.CLKSEL = 1;
         dev.usr_bank.bank0.bytes.PWR_MGMT_1.bits.SLEEP = 0;
         dev.usr_bank.bank0.bytes.PWR_MGMT_1.bits.DEVICE_RESET = 0;
-        ret = _spi_write(ICM20948_ADDR_PWR_MGMT_1, &dev.usr_bank.bank0.bytes.PWR_MGMT_1.byte, 0x01);
+        ret = icm20948_spi_write(ICM20948_ADDR_PWR_MGMT_1, &dev.usr_bank.bank0.bytes.PWR_MGMT_1.byte, 0x01);
     }
 
-    // Return our init status
+    if (ret == RETURN_OK)
+    {
+        icm20948_settings_t settings;
+        // Enable the Gyro
+        settings.gyro.en = ICM20948_MOD_ENABLED;
+        // Select the +-20000dps range
+        settings.gyro.fs = ICM20948_GYRO_FS_SEL_2000DPS;
+        // Enable the Accel
+        settings.accel.en = ICM20948_MOD_ENABLED;
+        // Select the +-2G range
+        settings.accel.fs = ICM20948_ACCEL_FS_SEL_2G;
+        ret = icm20948_applySettings(&settings);
+    }
+
     return ret;
 }
 
-/*!
- * @brief This API applys the developers settings for configuring the ICM20948 components
- */
-icm20948_return_code_t icm20948_applySettings(icm20948_settings_t *newSettings)
+return_code_t icm20948_applySettings(icm20948_settings_t *newSettings)
 {
-    icm20948_return_code_t ret = ICM20948_RET_OK;
+    return_code_t ret = RETURN_OK;
 
     // Copy over the new settings
     memcpy(&settings, newSettings, sizeof(settings));
@@ -208,149 +71,146 @@ icm20948_return_code_t icm20948_applySettings(icm20948_settings_t *newSettings)
     if (settings.gyro.en == ICM20948_MOD_ENABLED)
     {
         // Select Bank 2 if it isn't already
-        if ((dev.usr_bank.reg_bank_sel != ICM20948_USER_BANK_2) && (ret == ICM20948_RET_OK))
+        if ((dev.usr_bank.reg_bank_sel != ICM20948_USER_BANK_2) && (ret == RETURN_OK))
         {
             // Select Bank 0
             dev.usr_bank.reg_bank_sel = ICM20948_USER_BANK_2;
             // Write to the reg bank select to select bank 2
-            ret = _spi_write(ICM20948_ADDR_REG_BANK_SEL, (uint8_t *)&dev.usr_bank.reg_bank_sel, 0x01);
+            ret = icm20948_spi_write(ICM20948_ADDR_REG_BANK_SEL, (uint8_t *)&dev.usr_bank.reg_bank_sel, 0x01);
         }
 
-        if (ret == ICM20948_RET_OK)
+        if (ret == RETURN_OK)
         {
             // Set the Gyro Rate
             dev.usr_bank.bank2.bytes.GYRO_CONFIG_1.bits.GYRO_FS_SEL = settings.gyro.fs;
             dev.usr_bank.bank2.bytes.GYRO_CONFIG_1.bits.GYRO_FCHOICE = 1;
             dev.usr_bank.bank2.bytes.GYRO_CONFIG_1.bits.GYRO_DLPFCFG = 5;
-            ret = _spi_write(ICM20948_ADDR_GYRO_CONFIG_1, &dev.usr_bank.bank2.bytes.GYRO_CONFIG_1.byte, 0x01);
+            ret = icm20948_spi_write(ICM20948_ADDR_GYRO_CONFIG_1, &dev.usr_bank.bank2.bytes.GYRO_CONFIG_1.byte, 0x01);
         }
 
-        if (ret == ICM20948_RET_OK)
+        if (ret == RETURN_OK)
         {
             // Set the sample rate
             dev.usr_bank.bank2.bytes.GYRO_SMPLRT_DIV = 0x0A;
-            ret = _spi_write(ICM20948_ADDR_GYRO_SMPLRT_DIV, &dev.usr_bank.bank2.bytes.GYRO_SMPLRT_DIV, 0x01);
+            ret = icm20948_spi_write(ICM20948_ADDR_GYRO_SMPLRT_DIV, &dev.usr_bank.bank2.bytes.GYRO_SMPLRT_DIV, 0x01);
         }
     }
     else
     {
         // Disable the Gyro
         // Select Bank 0 if it isn't already
-        if ((dev.usr_bank.reg_bank_sel != ICM20948_USER_BANK_0) && (ret == ICM20948_RET_OK))
+        if ((dev.usr_bank.reg_bank_sel != ICM20948_USER_BANK_0) && (ret == RETURN_OK))
         {
             // Select Bank 0
             dev.usr_bank.reg_bank_sel = ICM20948_USER_BANK_0;
             // Write to the reg bank select to select bank 0
-            ret = _spi_write(ICM20948_ADDR_REG_BANK_SEL, (uint8_t *)&dev.usr_bank.reg_bank_sel, 0x01);
+            ret = icm20948_spi_write(ICM20948_ADDR_REG_BANK_SEL, (uint8_t *)&dev.usr_bank.reg_bank_sel, 0x01);
         }
 
-        if (ret == ICM20948_RET_OK)
+        if (ret == RETURN_OK)
         {
             // Read out the current PWR_MGMT Byte
-            ret = _spi_read(ICM20948_ADDR_PWR_MGMT_2, &dev.usr_bank.bank0.bytes.PWR_MGMT_2.byte, 0x01);
+            ret = icm20948_spi_read(ICM20948_ADDR_PWR_MGMT_2, &dev.usr_bank.bank0.bytes.PWR_MGMT_2.byte, 0x01);
         }
 
-        if (ret == ICM20948_RET_OK)
+        if (ret == RETURN_OK)
         {
             // Now disable the gyro in the config
             dev.usr_bank.bank0.bytes.PWR_MGMT_2.bits.DISABLE_GYRO = 0b111;
             // Write the config back to the device
-            ret = _spi_write(ICM20948_ADDR_PWR_MGMT_2, &dev.usr_bank.bank0.bytes.PWR_MGMT_2.byte, 0x01);
+            ret = icm20948_spi_write(ICM20948_ADDR_PWR_MGMT_2, &dev.usr_bank.bank0.bytes.PWR_MGMT_2.byte, 0x01);
         }
     }
 
     if (settings.accel.en == ICM20948_MOD_ENABLED)
     {
         // Select Bank 2 if it isn't already
-        if ((dev.usr_bank.reg_bank_sel != ICM20948_USER_BANK_2) && (ret == ICM20948_RET_OK))
+        if ((dev.usr_bank.reg_bank_sel != ICM20948_USER_BANK_2) && (ret == RETURN_OK))
         {
             // Select Bank 0
             dev.usr_bank.reg_bank_sel = ICM20948_USER_BANK_2;
             // Write to the reg bank select to select bank 2
-            ret = _spi_write(ICM20948_ADDR_REG_BANK_SEL, (uint8_t *)&dev.usr_bank.reg_bank_sel, 0x01);
+            ret = icm20948_spi_write(ICM20948_ADDR_REG_BANK_SEL, (uint8_t *)&dev.usr_bank.reg_bank_sel, 0x01);
         }
 
-        if (ret == ICM20948_RET_OK)
+        if (ret == RETURN_OK)
         {
             // Setup the Accel Config
             dev.usr_bank.bank2.bytes.ACCEL_CONFIG.bits.ACCEL_FS_SEL = settings.accel.fs;
             dev.usr_bank.bank2.bytes.ACCEL_CONFIG.bits.ACCEL_FCHOICE = 1;
             dev.usr_bank.bank2.bytes.ACCEL_CONFIG.bits.ACCEL_DLPFCFG = 5;
-            ret = _spi_write(ICM20948_ADDR_ACCEL_CONFIG, &dev.usr_bank.bank2.bytes.ACCEL_CONFIG.byte, 0x01);
+            ret = icm20948_spi_write(ICM20948_ADDR_ACCEL_CONFIG, &dev.usr_bank.bank2.bytes.ACCEL_CONFIG.byte, 0x01);
         }
 
-        if (ret == ICM20948_RET_OK)
+        if (ret == RETURN_OK)
         {
             // Set the sample rate
             dev.usr_bank.bank2.bytes.ACCEL_SMPLRT_DIV_1.bits.ACCEL_SMPLRT_DIV = 0;
-            ret = _spi_write(ICM20948_ADDR_ACCEL_SMPLRT_DIV_1, &dev.usr_bank.bank2.bytes.ACCEL_SMPLRT_DIV_1.byte, 0x01);
+            ret = icm20948_spi_write(ICM20948_ADDR_ACCEL_SMPLRT_DIV_1, &dev.usr_bank.bank2.bytes.ACCEL_SMPLRT_DIV_1.byte, 0x01);
         }
 
-        if (ret == ICM20948_RET_OK)
+        if (ret == RETURN_OK)
         {
             // Set the sample rate
             dev.usr_bank.bank2.bytes.ACCEL_SMPLRT_DIV_2 = 0x0A;
-            ret = _spi_write(ICM20948_ADDR_ACCEL_SMPLRT_DIV_2, &dev.usr_bank.bank2.bytes.ACCEL_SMPLRT_DIV_2, 0x01);
+            ret = icm20948_spi_write(ICM20948_ADDR_ACCEL_SMPLRT_DIV_2, &dev.usr_bank.bank2.bytes.ACCEL_SMPLRT_DIV_2, 0x01);
         }
     }
     else
     {
         // Disable the Accelerometer
         // Select Bank 0 if it isn't already
-        if ((dev.usr_bank.reg_bank_sel != ICM20948_USER_BANK_0) && (ret == ICM20948_RET_OK))
+        if ((dev.usr_bank.reg_bank_sel != ICM20948_USER_BANK_0) && (ret == RETURN_OK))
         {
             // Select Bank 0
             dev.usr_bank.reg_bank_sel = ICM20948_USER_BANK_0;
             // Write to the reg bank select to select bank 0
-            ret = _spi_write(ICM20948_ADDR_REG_BANK_SEL, (uint8_t *)&dev.usr_bank.reg_bank_sel, 0x01);
+            ret = icm20948_spi_write(ICM20948_ADDR_REG_BANK_SEL, (uint8_t *)&dev.usr_bank.reg_bank_sel, 0x01);
         }
 
-        if (ret == ICM20948_RET_OK)
+        if (ret == RETURN_OK)
         {
             // Read out the current PWR_MGMT Byte
-            ret = _spi_read(ICM20948_ADDR_PWR_MGMT_2, &dev.usr_bank.bank0.bytes.PWR_MGMT_2.byte, 0x01);
+            ret = icm20948_spi_read(ICM20948_ADDR_PWR_MGMT_2, &dev.usr_bank.bank0.bytes.PWR_MGMT_2.byte, 0x01);
         }
 
-        if (ret == ICM20948_RET_OK)
+        if (ret == RETURN_OK)
         {
             // Now disable the accel in the config
             dev.usr_bank.bank0.bytes.PWR_MGMT_2.bits.DISABLE_ACCEL = 0b111;
             // Write the config back to the device
-            ret = _spi_write(ICM20948_ADDR_PWR_MGMT_2, &dev.usr_bank.bank0.bytes.PWR_MGMT_2.byte, 0x01);
+            ret = icm20948_spi_write(ICM20948_ADDR_PWR_MGMT_2, &dev.usr_bank.bank0.bytes.PWR_MGMT_2.byte, 0x01);
         }
     }
 
     return ret;
 }
 
-/*!
- * @brief This API retrieves the current gyro data from the device
- */
-icm20948_return_code_t icm20948_getGyroData(icm20948_gyro_t *gyro)
+return_code_t icm20948_getGyroData(icm20948_gyro_t *gyro)
 {
-    icm20948_return_code_t ret = ICM20948_RET_OK;
+    return_code_t ret = RETURN_OK;
 
     // Check if the Gyro is enabled
     if (settings.gyro.en != ICM20948_MOD_ENABLED)
     {
-        ret = ICM20948_RET_INV_CONFIG;
+        ret = RETURN_INV_CONFIG;
     }
 
-    if ((dev.usr_bank.reg_bank_sel != ICM20948_USER_BANK_0) && (ret == ICM20948_RET_OK))
+    if ((dev.usr_bank.reg_bank_sel != ICM20948_USER_BANK_0) && (ret == RETURN_OK))
     {
         // Select Bank 0
         dev.usr_bank.reg_bank_sel = ICM20948_USER_BANK_0;
         // Write to the reg bank select to select bank 0
-        ret = _spi_write(ICM20948_ADDR_REG_BANK_SEL, (uint8_t *)&dev.usr_bank.reg_bank_sel, 0x01);
+        ret = icm20948_spi_write(ICM20948_ADDR_REG_BANK_SEL, (uint8_t *)&dev.usr_bank.reg_bank_sel, 0x01);
     }
 
-    if (ret == ICM20948_RET_OK)
+    if (ret == RETURN_OK)
     {
         // Read out the 6 bytes of gyro data
-        ret = _spi_read(ICM20948_ADDR_GYRO_XOUT_H, &dev.usr_bank.bank0.bytes.GYRO_XOUT_H, 0x06);
+        ret = icm20948_spi_read(ICM20948_ADDR_GYRO_XOUT_H, &dev.usr_bank.bank0.bytes.GYRO_XOUT_H, 0x06);
     }
 
-    if (ret == ICM20948_RET_OK)
+    if (ret == RETURN_OK)
     {
         // Arrang the gyro data nicely in the provided struct
         gyro->x = ((int16_t)dev.usr_bank.bank0.bytes.GYRO_XOUT_H << 8) | dev.usr_bank.bank0.bytes.GYRO_XOUT_L;
@@ -390,11 +250,11 @@ icm20948_return_code_t icm20948_getGyroData(icm20948_gyro_t *gyro)
             gyro->x = 0;
             gyro->y = 0;
             gyro->z = 0;
-            ret = ICM20948_RET_INV_CONFIG;
+            ret = RETURN_INV_CONFIG;
             break;
         }
 
-        if (ret == ICM20948_RET_OK)
+        if (ret == RETURN_OK)
         {
             // Remove noise by modulo dividing with our configured
             // resolution
@@ -413,34 +273,31 @@ icm20948_return_code_t icm20948_getGyroData(icm20948_gyro_t *gyro)
     return ret;
 }
 
-/*!
- * @brief This API retrieves the current accel data from the device
- */
-icm20948_return_code_t icm20948_getAccelData(icm20948_accel_t *accel)
+return_code_t icm20948_getAccelData(icm20948_accel_t *accel)
 {
-    icm20948_return_code_t ret = ICM20948_RET_OK;
+    return_code_t ret = RETURN_OK;
 
     // Check if the Accelerometer is enabled
     if (settings.accel.en != ICM20948_MOD_ENABLED)
     {
-        ret = ICM20948_RET_INV_CONFIG;
+        ret = RETURN_INV_CONFIG;
     }
 
-    if ((dev.usr_bank.reg_bank_sel != ICM20948_USER_BANK_0) && (ret == ICM20948_RET_OK))
+    if ((dev.usr_bank.reg_bank_sel != ICM20948_USER_BANK_0) && (ret == RETURN_OK))
     {
         // Select Bank 0
         dev.usr_bank.reg_bank_sel = ICM20948_USER_BANK_0;
         // Write to the reg bank select to select bank 0
-        ret = _spi_write(ICM20948_ADDR_REG_BANK_SEL, (uint8_t *)&dev.usr_bank.reg_bank_sel, 0x01);
+        ret = icm20948_spi_write(ICM20948_ADDR_REG_BANK_SEL, (uint8_t *)&dev.usr_bank.reg_bank_sel, 0x01);
     }
 
-    if (ret == ICM20948_RET_OK)
+    if (ret == RETURN_OK)
     {
         // Read out the 6 bytes of gyro data
-        ret = _spi_read(ICM20948_ADDR_ACCEL_XOUT_H, &dev.usr_bank.bank0.bytes.ACCEL_XOUT_H, 0x06);
+        ret = icm20948_spi_read(ICM20948_ADDR_ACCEL_XOUT_H, &dev.usr_bank.bank0.bytes.ACCEL_XOUT_H, 0x06);
     }
 
-    if (ret == ICM20948_RET_OK)
+    if (ret == RETURN_OK)
     {
         // Arrang the gyro data nicely in the provided struct
         accel->x = ((int16_t)dev.usr_bank.bank0.bytes.ACCEL_XOUT_H << 8) | dev.usr_bank.bank0.bytes.ACCEL_XOUT_L;
@@ -480,11 +337,11 @@ icm20948_return_code_t icm20948_getAccelData(icm20948_accel_t *accel)
             accel->x = 0;
             accel->y = 0;
             accel->z = 0;
-            ret = ICM20948_RET_INV_CONFIG;
+            ret = RETURN_INV_CONFIG;
             break;
         }
 
-        if (ret == ICM20948_RET_OK)
+        if (ret == RETURN_OK)
         {
             // Remove noise by modulo dividing with our configured
             // resolution

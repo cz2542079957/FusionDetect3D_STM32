@@ -2,8 +2,8 @@
 #include "stm32f1xx.h"
 
 // IO口操作宏定义
-#define BITBAND(addr, bitnum)                                                  \
-  ((addr & 0xF0000000) + 0x2000000 + ((addr & 0xFFFFF) << 5) + (bitnum << 2))
+#define BITBAND(addr, bitnum) \
+    ((addr & 0xF0000000) + 0x2000000 + ((addr & 0xFFFFF) << 5) + (bitnum << 2))
 #define MEM_ADDR(addr) *((volatile unsigned long *)(addr))
 #define BIT_ADDR(addr, bitnum) MEM_ADDR(BITBAND(addr, bitnum))
 
@@ -25,26 +25,36 @@
 #define GPIOG_IDR_Addr (GPIOG_BASE + 8) // 0x40011E08
 
 // IO口操作,只对单一的IO口!
-//确保n的值小于16!
-#define PAout(n) BIT_ADDR(GPIOA_ODR_Addr, n) //输出
-#define PAin(n) BIT_ADDR(GPIOA_IDR_Addr, n)  //输入
+// 确保n的值小于16!
+#define PAout(n) BIT_ADDR(GPIOA_ODR_Addr, n) // 输出
+#define PAin(n) BIT_ADDR(GPIOA_IDR_Addr, n)  // 输入
 
-#define PBout(n) BIT_ADDR(GPIOB_ODR_Addr, n) //输出
-#define PBin(n) BIT_ADDR(GPIOB_IDR_Addr, n)  //输入
+#define PBout(n) BIT_ADDR(GPIOB_ODR_Addr, n) // 输出
+#define PBin(n) BIT_ADDR(GPIOB_IDR_Addr, n)  // 输入
 
-#define PCout(n) BIT_ADDR(GPIOC_ODR_Addr, n) //输出
-#define PCin(n) BIT_ADDR(GPIOC_IDR_Addr, n)  //输入
+#define PCout(n) BIT_ADDR(GPIOC_ODR_Addr, n) // 输出
+#define PCin(n) BIT_ADDR(GPIOC_IDR_Addr, n)  // 输入
 
-#define PDout(n) BIT_ADDR(GPIOD_ODR_Addr, n) //输出
-#define PDin(n) BIT_ADDR(GPIOD_IDR_Addr, n)  //输入
+#define PDout(n) BIT_ADDR(GPIOD_ODR_Addr, n) // 输出
+#define PDin(n) BIT_ADDR(GPIOD_IDR_Addr, n)  // 输入
 
-#define PEout(n) BIT_ADDR(GPIOE_ODR_Addr, n) //输出
-#define PEin(n) BIT_ADDR(GPIOE_IDR_Addr, n)  //输入
+#define PEout(n) BIT_ADDR(GPIOE_ODR_Addr, n) // 输出
+#define PEin(n) BIT_ADDR(GPIOE_IDR_Addr, n)  // 输入
 
-#define PFout(n) BIT_ADDR(GPIOF_ODR_Addr, n) //输出
-#define PFin(n) BIT_ADDR(GPIOF_IDR_Addr, n)  //输入
+#define PFout(n) BIT_ADDR(GPIOF_ODR_Addr, n) // 输出
+#define PFin(n) BIT_ADDR(GPIOF_IDR_Addr, n)  // 输入
 
-#define PGout(n) BIT_ADDR(GPIOG_ODR_Addr, n) //输出
-#define PGin(n) BIT_ADDR(GPIOG_IDR_Addr, n)  //输入
+#define PGout(n) BIT_ADDR(GPIOG_ODR_Addr, n) // 输出
+#define PGin(n) BIT_ADDR(GPIOG_IDR_Addr, n)  // 输入
 
 #define ABS(x) (((x) >= 0) ? (x) : -(x))
+
+typedef enum
+{
+    RETURN_OK = 0,          // 成功
+    RETURN_GEN_FAIL = -1,   // 通用失败
+    RETURN_INV_PARAM = -2,  // 参数错误
+    RETURN_NULL_PTR = -3,   // 指针为空
+    RETURN_INV_CONFIG = -4, // 配置错误
+    RETURN_TIMEOUT = -5     // 超时
+} return_code_t;

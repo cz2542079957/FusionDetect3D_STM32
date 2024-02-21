@@ -14,6 +14,7 @@ void uart_data_publisher();
 /*public*/
 void bsp_init()
 {
+    return_code_t ret = RETURN_OK;
     // 串口通讯初始化
     uart_init();
     // 板载按键1初始化
@@ -26,40 +27,8 @@ void bsp_init()
     motor_init();
     // 编码器初始化
     encoder_init();
-
     // icm20948初始化
-
-    icm20948_return_code_t ret = ICM20948_RET_OK;
-    icm20948_settings_t settings;
-//    icm20948_gyro_t gyro_data;
-//    icm20948_accel_t accel_data;
-
-    // Init the device function pointers
-    ret = icm20948_init(usr_read, usr_write, usr_delay_us);
-
-    // Check if we successfully stored the function poiners provided
-    if (ret == ICM20948_RET_OK)
-    {
-        // Enable the Gyro
-        settings.gyro.en = ICM20948_MOD_ENABLED;
-        // Select the +-20000dps range
-        settings.gyro.fs = ICM20948_GYRO_FS_SEL_2000DPS;
-        // Enable the Accel
-        settings.accel.en = ICM20948_MOD_ENABLED;
-        // Select the +-2G range
-        settings.accel.fs = ICM20948_ACCEL_FS_SEL_2G;
-        ret = icm20948_applySettings(&settings);
-    }
-
-    // while (1)
-    // {
-    //     // Retrieve the Gyro data and store it in our gyro_data struct
-    //     // Output is in dps (Degress per second)
-    //     ret |= icm20948_getGyroData(&gyro_data);
-    //     // Retrieve the Accel data and store it in our accel_data struct
-    //     // Output is in mG
-    //     ret |= icm20948_getAccelData(&accel_data);
-    // }
+    ret = icm20948_init();
 }
 void on_time(uint16_t interval)
 {

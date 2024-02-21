@@ -2,7 +2,7 @@
 
 SPI_HandleTypeDef hspi2;
 
-uint8_t icm20948_spi_init()
+return_code_t icm20948_spi_init()
 {
     __HAL_RCC_GPIOB_CLK_ENABLE();
     // GPIO初始化
@@ -17,7 +17,7 @@ uint8_t icm20948_spi_init()
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-    // cs
+    // CS片选
     GPIO_InitStruct.Pin = GPIO_PIN_12;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
@@ -35,5 +35,67 @@ uint8_t icm20948_spi_init()
     hspi2.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256; // 设置波特率预分频值为256
     hspi2.Init.FirstBit = SPI_FIRSTBIT_MSB;                   // 设置数据传输从最高位（MSB）开始
     hspi2.Init.CRCPolynomial = 7;                             // 设置CRC多项式（通常在需要CRC校验时使用）
-    HAL_SPI_Init(&hspi2);                                     // 初始化SPI2外设
+    if (HAL_SPI_Init(&hspi2) != HAL_OK)                       // 初始化SPI2外设
+    {
+        return RETURN_GEN_FAIL;
+    }
+    return RETURN_OK;
+}
+
+return_code_t icm20948_spi_read(uint8_t addr, uint8_t *data, uint32_t len)
+{
+    GPIO_TypeDef *CS_port = GPIOB;
+    uint16_t CS_pin = GPIO_PIN_12;
+
+    HAL_GPIO_WritePin(CS_port, CS_pin, GPIO_PIN_RESET); // 下拉CS信号开始传输
+
+    // 构造带有读标志的地址
+    uint8_t tx_buffer[1];
+    tx_buffer[0] = addr | (0x01 << 7);
+
+    // 先发送带读标志的地址
+    HAL_StatusTypeDef status = HAL_SPI_Transmit(&hspi2, tx_buffer, 1, 0xffff);
+
+    if (status != HAL_OK)
+    {
+        HAL_GPIO_WritePin(CS_port, CS_pin, GPIO_PIN_SET); // 上拉CS信号结束传输
+        return RETURN_GEN_FAIL;
+    }
+
+    // 接收数据
+    status = HAL_SPI_Receive(&hspi2, data, len, 0xffff);
+
+    HAL_GPIO_WritePin(CS_port, CS_pin, GPIO_PIN_SET); // 上拉CS信号结束传输
+
+    if (status != HAL_OK)
+    {
+        return RETURN_GEN_FAIL;
+    }
+
+    return RETURN_OK;
+}
+
+return_code_t icm20948_spi_write(uint8_t addr, uint8_t *data, uint32_t len)
+{
+    GPIO_TypeDef *CS_port = GPIOB;
+    uint16_t CS_pin = GPIO_PIN_12;
+
+    HAL_GPIO_WritePin(CS_port, CS_pin, GPIO_PIN_RESET); // 下拉CS信号开始传输
+
+    // 构造发送数据缓冲区
+    uint8_t tx_buffer[len + 1];
+    tx_buffer[0] = addr;
+    memcpy(&tx_buffer[1], data, len);
+
+    // 执行SPI传输
+    HAL_StatusTypeDef status = HAL_SPI_Transmit(&hspi2, tx_buffer, len + 1, 0xffff);
+
+    HAL_GPIO_WritePin(CS_port, CS_pin, GPIO_PIN_SET); // 上拉CS信号结束传输
+
+    if (status != HAL_OK)
+    {
+        return RETURN_GEN_FAIL;
+    }
+
+    return RETURN_OK;
 }
