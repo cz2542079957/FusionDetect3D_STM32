@@ -81,3 +81,9 @@ return_code_t icm20948_applySettings(icm20948_settings_t *newSettings);
 return_code_t icm20948_getGyroData(icm20948_gyro_t *gyro);
 
 return_code_t icm20948_getAccelData(icm20948_accel_t *accel);
+
+uint16_t icm20948_get_fifo_count();
+
+uint8_t *icm20948_read_fifo(uint16_t len);
+
+uint8_t icm20948_read();

@@ -1,5 +1,16 @@
+/*
+ * @Author: cz2542079957 2542079957@qq.com
+ * @Date: 2024-02-18 13:49:37
+ * @LastEditors: cz2542079957 2542079957@qq.com
+ * @LastEditTime: 2024-02-22 15:19:43
+ * @FilePath: /master/Core/Inc/BSP/common.h
+ * @Description:
+ *
+ * Copyright (c) 2024 by ${git_name_email}, All Rights Reserved.
+ */
 #pragma once
 #include "stm32f1xx.h"
+#include "stdio.h"
 
 // IO口操作宏定义
 #define BITBAND(addr, bitnum) \

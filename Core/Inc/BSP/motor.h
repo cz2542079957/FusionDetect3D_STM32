@@ -1,5 +1,6 @@
+
 #pragma once
-#include "stm32f1xx.h"
+#include "common.h"
 
 #define MOTOR_ENABLE_A (0x01)
 #define MOTOR_ENABLE_B (0x02)
@@ -57,8 +58,8 @@ typedef enum
     MOTOR_SPEED_MIN = -3600,
     // 电机死区校正值
     MOTOR_IGNORE_PULSE = 2000,
-    // 速度变化率
-    MOTOR_SPEED_INCREMENT = 10,
+    // 速度根据时间的变化系数
+    MOTOR_SPEED_INCREMENT_COE = 1,
     MOTOR_FRONT = 1,
     MOTOR_BACK = -1,
     MOTOR_STOP = 0

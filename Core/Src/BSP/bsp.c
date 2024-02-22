@@ -29,21 +29,42 @@ void bsp_init()
     encoder_init();
     // icm20948初始化
     ret = icm20948_init();
+
+    // while (1)
+    // {
+    //     // uint16_t count = icm20948_get_fifo_count();
+    //     // HAL_Delay(10);
+    //     // // uint8_t *data;
+    //     // // data = icm20948_read_fifo(count);
+    //     // uint8_t data1 = icm20948_read();
+    //     // HAL_Delay(10);
+    //     // // printf("debug:%d\n", count);
+    //     // if (count > 0)
+    //     // {
+    //     //     beep_once(10);
+    //     // }
+    //     HAL_Delay(10);
+    //     encoder_update_count();
+    // }
 }
-void on_time(uint16_t interval)
+void main_on_time(uint16_t interval)
+{
+    // motor - motion
+    motion_on_time(interval);
+}
+
+void sub_on_time(uint16_t interval)
 {
     // key1
     key1_on_time(interval);
-
     // led
     led_on_time(interval);
     // beep
     beep_on_time(interval);
-    // motor - motion
-    motion_on_time(interval);
-
     // 服务
     on_time_service();
+    // 电机编码器
+    encoder_on_time(interval);
 }
 
 /*实现 */

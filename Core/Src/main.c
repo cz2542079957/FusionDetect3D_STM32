@@ -1,5 +1,30 @@
 #include "main.h"
 
+uint8_t main_tick = 0;
+
+int main(void)
+{
+    HAL_Init();           // 初始化HAL库
+    SystemClock_Config(); // 初始化系统时钟
+    bsp_init();           // 板载硬件初始化
+
+    // beep_sound_start();
+    led_flash(20);
+    led_keep_on();
+    while (1)
+    {
+        /*
+        main循环每个MAIN_LOOP_CYCLE执行一次
+        sub循环每2个MAIN_LOOP_CYCLE执行一次(1个SUB_LOOP_CYCLE)
+        */
+        main_on_time(MAIN_LOOP_CYCLE);
+        if (main_tick % 2 == 0)
+            sub_on_time(SUB_LOOP_CYCLE);
+        HAL_Delay(MAIN_LOOP_CYCLE);
+        main_tick++;
+    }
+    // beep_sound_end();
+}
 void SystemClock_Config(void)
 {
     RCC_OscInitTypeDef RCC_OscInitStruct = {0};
@@ -40,32 +65,10 @@ void SysTick_Handler(void)
     HAL_IncTick();
 }
 
-int main(void)
-{
-    HAL_Init();
-    SystemClock_Config();
-    // 板载硬件初始化
-    bsp_init();
-
-    // beep_sound_start();
-    led_flash(20);
-    led_keep_on();
-    while (1)
-    {
-
-        on_time(ON_TIME_INTERVAL);
-        HAL_Delay(ON_TIME_INTERVAL);
-    }
-    beep_sound_end();
-}
-
 void Error_Handler(void)
 {
-    /* USER CODE BEGIN Error_Handler_Debug */
-    /* User can add his own implementation to report the HAL error return state */
     __disable_irq();
     while (1)
     {
     }
-    /* USER CODE END Error_Handler_Debug */
 }

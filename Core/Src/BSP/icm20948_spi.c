@@ -7,21 +7,21 @@ return_code_t icm20948_spi_init()
     __HAL_RCC_GPIOB_CLK_ENABLE();
     // GPIO初始化
     GPIO_InitTypeDef GPIO_InitStruct = {0};
-    GPIO_InitStruct.Pin = GPIO_PIN_13 | GPIO_PIN_15;
+    GPIO_InitStruct.Pin = ICM20948_SPI_GPIO_SCK | ICM20948_SPI_GPIO_MOSI;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    HAL_GPIO_Init(ICM20948_SPI_GPIO_PORT, &GPIO_InitStruct);
 
-    GPIO_InitStruct.Pin = GPIO_PIN_14;
+    GPIO_InitStruct.Pin = ICM20948_SPI_GPIO_MISO;
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    HAL_GPIO_Init(ICM20948_SPI_GPIO_PORT, &GPIO_InitStruct);
 
     // CS片选
-    GPIO_InitStruct.Pin = GPIO_PIN_12;
+    GPIO_InitStruct.Pin = ICM20948_SPI_GPIO_CS;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+    HAL_GPIO_Init(ICM20948_SPI_GPIO_PORT, &GPIO_InitStruct);
 
     // SPI初始化
     __HAL_RCC_SPI2_CLK_ENABLE();                              // 启用SPI2的时钟
@@ -44,58 +44,42 @@ return_code_t icm20948_spi_init()
 
 return_code_t icm20948_spi_read(uint8_t addr, uint8_t *data, uint32_t len)
 {
-    GPIO_TypeDef *CS_port = GPIOB;
-    uint16_t CS_pin = GPIO_PIN_12;
-
-    HAL_GPIO_WritePin(CS_port, CS_pin, GPIO_PIN_RESET); // 下拉CS信号开始传输
+    HAL_GPIO_WritePin(ICM20948_SPI_GPIO_PORT, ICM20948_SPI_GPIO_CS, GPIO_PIN_RESET); // 下拉CS信号开始传输
 
     // 构造带有读标志的地址
     uint8_t tx_buffer[1];
-    tx_buffer[0] = addr | (0x01 << 7);
+    tx_buffer[0] = ((addr & 0x7F) | 0x80);
 
     // 先发送带读标志的地址
     HAL_StatusTypeDef status = HAL_SPI_Transmit(&hspi2, tx_buffer, 1, 0xffff);
 
     if (status != HAL_OK)
     {
-        HAL_GPIO_WritePin(CS_port, CS_pin, GPIO_PIN_SET); // 上拉CS信号结束传输
+        HAL_GPIO_WritePin(ICM20948_SPI_GPIO_PORT, ICM20948_SPI_GPIO_CS, GPIO_PIN_SET); // 上拉CS信号结束传输
         return RETURN_GEN_FAIL;
     }
 
     // 接收数据
     status = HAL_SPI_Receive(&hspi2, data, len, 0xffff);
 
-    HAL_GPIO_WritePin(CS_port, CS_pin, GPIO_PIN_SET); // 上拉CS信号结束传输
+    HAL_GPIO_WritePin(ICM20948_SPI_GPIO_PORT, ICM20948_SPI_GPIO_CS, GPIO_PIN_SET); // 上拉CS信号结束传输
 
-    if (status != HAL_OK)
-    {
-        return RETURN_GEN_FAIL;
-    }
-
-    return RETURN_OK;
+    return status != HAL_OK ? RETURN_GEN_FAIL : RETURN_OK;
 }
 
 return_code_t icm20948_spi_write(uint8_t addr, uint8_t *data, uint32_t len)
 {
-    GPIO_TypeDef *CS_port = GPIOB;
-    uint16_t CS_pin = GPIO_PIN_12;
-
-    HAL_GPIO_WritePin(CS_port, CS_pin, GPIO_PIN_RESET); // 下拉CS信号开始传输
+    HAL_GPIO_WritePin(ICM20948_SPI_GPIO_PORT, ICM20948_SPI_GPIO_CS, GPIO_PIN_RESET); // 下拉CS信号开始传输
 
     // 构造发送数据缓冲区
     uint8_t tx_buffer[len + 1];
-    tx_buffer[0] = addr;
+    tx_buffer[0] = ((addr & 0x7F) | 0x00);
     memcpy(&tx_buffer[1], data, len);
 
     // 执行SPI传输
     HAL_StatusTypeDef status = HAL_SPI_Transmit(&hspi2, tx_buffer, len + 1, 0xffff);
 
-    HAL_GPIO_WritePin(CS_port, CS_pin, GPIO_PIN_SET); // 上拉CS信号结束传输
+    HAL_GPIO_WritePin(ICM20948_SPI_GPIO_PORT, ICM20948_SPI_GPIO_CS, GPIO_PIN_SET); // 上拉CS信号结束传输
 
-    if (status != HAL_OK)
-    {
-        return RETURN_GEN_FAIL;
-    }
-
-    return RETURN_OK;
+    return status != HAL_OK ? RETURN_GEN_FAIL : RETURN_OK;
 }

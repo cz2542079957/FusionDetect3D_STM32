@@ -3,6 +3,12 @@
 
 extern SPI_HandleTypeDef hspi2;
 
+#define ICM20948_SPI_GPIO_PORT GPIOB       // SPI 端口
+#define ICM20948_SPI_GPIO_CS GPIO_PIN_12   // 片选引脚
+#define ICM20948_SPI_GPIO_SCK GPIO_PIN_13  // SCK引脚
+#define ICM20948_SPI_GPIO_MISO GPIO_PIN_14 // MISO引脚
+#define ICM20948_SPI_GPIO_MOSI GPIO_PIN_15 // MOSI引脚
+
 /**
  * @description: icm20948的spi初始化函数
  */

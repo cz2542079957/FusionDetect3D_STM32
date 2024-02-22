@@ -2,6 +2,7 @@
 #include <string.h>
 #include "icm20948.h"
 #include "icm20948_spi.h"
+#include "icm20948_api.h"
 
 static icm20948_dev_t dev;
 static icm20948_settings_t settings;
@@ -38,7 +39,7 @@ return_code_t icm20948_init()
     if (ret == RETURN_OK)
     {
         dev.usr_bank.bank0.bytes.PWR_MGMT_1.bits.CLKSEL = 1;
-        dev.usr_bank.bank0.bytes.PWR_MGMT_1.bits.SLEEP = 0;
+        dev.usr_bank.bank0.bytes.PWR_MGMT_1.bits.SLEEP = 0; // 非睡眠模式
         dev.usr_bank.bank0.bytes.PWR_MGMT_1.bits.DEVICE_RESET = 0;
         ret = icm20948_spi_write(ICM20948_ADDR_PWR_MGMT_1, &dev.usr_bank.bank0.bytes.PWR_MGMT_1.byte, 0x01);
     }
@@ -82,8 +83,8 @@ return_code_t icm20948_applySettings(icm20948_settings_t *newSettings)
         if (ret == RETURN_OK)
         {
             // Set the Gyro Rate
-            dev.usr_bank.bank2.bytes.GYRO_CONFIG_1.bits.GYRO_FS_SEL = settings.gyro.fs;
             dev.usr_bank.bank2.bytes.GYRO_CONFIG_1.bits.GYRO_FCHOICE = 1;
+            dev.usr_bank.bank2.bytes.GYRO_CONFIG_1.bits.GYRO_FS_SEL = settings.gyro.fs;
             dev.usr_bank.bank2.bytes.GYRO_CONFIG_1.bits.GYRO_DLPFCFG = 5;
             ret = icm20948_spi_write(ICM20948_ADDR_GYRO_CONFIG_1, &dev.usr_bank.bank2.bytes.GYRO_CONFIG_1.byte, 0x01);
         }
@@ -181,6 +182,46 @@ return_code_t icm20948_applySettings(icm20948_settings_t *newSettings)
             // Write the config back to the device
             ret = icm20948_spi_write(ICM20948_ADDR_PWR_MGMT_2, &dev.usr_bank.bank0.bytes.PWR_MGMT_2.byte, 0x01);
         }
+    }
+
+    if ((dev.usr_bank.reg_bank_sel != ICM20948_USER_BANK_0) && (ret == RETURN_OK))
+    {
+        // Select Bank 0
+        dev.usr_bank.reg_bank_sel = ICM20948_USER_BANK_0;
+        ret = icm20948_spi_write(ICM20948_ADDR_REG_BANK_SEL, (uint8_t *)&dev.usr_bank.reg_bank_sel, 0x01);
+    }
+
+    // if (ret == RETURN_OK)
+    // {
+    //     // Enable the FIFO and DMP
+    //     dev.usr_bank.bank0.bytes.FIFO_MODE.bits.FIFO_MODE = 0;
+    //     ret = icm20948_spi_write(ICM20948_ADDR_FIFO_MODE, &dev.usr_bank.bank0.bytes.USER_CTRL.byte, 0x01);
+    // }
+
+    if (ret == RETURN_OK)
+    {
+        // Enable the FIFO and DMP
+        dev.usr_bank.bank0.bytes.USER_CTRL.bits.FIFO_EN = 1;
+        dev.usr_bank.bank0.bytes.USER_CTRL.bits.DMP_EN = 1;
+        ret = icm20948_spi_write(ICM20948_ADDR_USER_CTRL, &dev.usr_bank.bank0.bytes.USER_CTRL.byte, 0x01);
+    }
+
+    if (ret == RETURN_OK)
+    {
+        dev.usr_bank.bank0.bytes.FIFO_EN_1.bits.SLV_0_FIFO_EN = 1;
+        dev.usr_bank.bank0.bytes.FIFO_EN_1.bits.SLV_1_FIFO_EN = 1;
+        dev.usr_bank.bank0.bytes.FIFO_EN_1.bits.SLV_2_FIFO_EN = 1;
+        dev.usr_bank.bank0.bytes.FIFO_EN_1.bits.SLV_3_FIFO_EN = 1;
+        ret = icm20948_spi_write(ICM20948_ADDR_FIFO_EN_1, &dev.usr_bank.bank0.bytes.FIFO_EN_1.byte, 0x01);
+    }
+    if (ret == RETURN_OK)
+    {
+        dev.usr_bank.bank0.bytes.FIFO_EN_2.bits.ACCEL_FIFO_EN = 1;
+        dev.usr_bank.bank0.bytes.FIFO_EN_2.bits.GYRO_X_FIFO_EN = 1;
+        dev.usr_bank.bank0.bytes.FIFO_EN_2.bits.GYRO_Y_FIFO_EN = 1;
+        dev.usr_bank.bank0.bytes.FIFO_EN_2.bits.GYRO_Z_FIFO_EN = 1;
+        dev.usr_bank.bank0.bytes.FIFO_EN_2.bits.TEMP_FIFO_EN = 1;
+        ret = icm20948_spi_write(ICM20948_ADDR_FIFO_EN_2, &dev.usr_bank.bank0.bytes.FIFO_EN_2.byte, 0x01);
     }
 
     return ret;
@@ -358,4 +399,47 @@ return_code_t icm20948_getAccelData(icm20948_accel_t *accel)
     }
 
     return ret;
+}
+
+uint16_t icm20948_get_fifo_count()
+{
+    uint16_t count = 0x00;
+    uint8_t count_l = 0x00;
+    uint8_t count_h = 0x00;
+    if (icm20948_spi_read(ICM20948_ADDR_FIFO_COUNTH, &count_h, 0x01) == RETURN_OK)
+    {
+        if (icm20948_spi_read(ICM20948_ADDR_FIFO_COUNTL, &count_l, 0x01) == RETURN_OK)
+        {
+            count = (count_h << 8) | count_l;
+        }
+    }
+    return count;
+}
+
+uint8_t *icm20948_read_fifo(uint16_t len)
+{
+    uint8_t data[len];
+    memset(data, 0, sizeof(data));
+    // if (icm20948_spi_read(ICM20948_ADDR_FIFO_R_W, &data, len) == RETURN_OK)
+    // {
+    //     return data;
+    // }
+    if (icm20948_spi_read(ICM20948_ADDR_FIFO_EN_1, &data, 0x01) == RETURN_OK)
+    {
+        return data;
+    }
+}
+
+uint8_t icm20948_read()
+{
+    uint8_t data;
+    // if (icm20948_spi_read(ICM20948_ADDR_FIFO_EN_1, &data, 0x01) == RETURN_OK)
+    // {
+    //     return data;
+    // }
+
+    if (icm20948_spi_read(ICM20948_ADDR_USER_CTRL, &data, 0x01) == RETURN_OK)
+    {
+        return data;
+    }
 }

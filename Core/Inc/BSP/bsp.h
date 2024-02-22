@@ -35,6 +35,7 @@ typedef enum
 // 硬件初始化
 void bsp_init();
 
-void on_time_service();
-// 周期轮询
-void on_time(uint16_t interval);
+// 主周期轮询
+void main_on_time(uint16_t interval);
+// 次周期轮询
+void sub_on_time(uint16_t interval);

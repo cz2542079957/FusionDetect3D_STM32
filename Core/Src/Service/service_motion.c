@@ -239,14 +239,12 @@ void motion_on_time(uint16_t interval)
     {
         if (current_motor_pulse[i] == target_motor_pulse[i])
             continue;
+        int16_t speed_delta = MOTOR_SPEED_INCREMENT_COE * interval;
         int16_t new_pulse = target_motor_pulse[i] > current_motor_pulse[i]
-                                ? (current_motor_pulse[i] + MOTOR_SPEED_INCREMENT)
-                                : (current_motor_pulse[i] - MOTOR_SPEED_INCREMENT);
+                                ? (current_motor_pulse[i] + speed_delta)
+                                : (current_motor_pulse[i] - speed_delta);
         // 如果距离目标较小，则直接赋值相等
-        int16_t temp = new_pulse > target_motor_pulse[i]
-                           ? (new_pulse - target_motor_pulse[i])
-                           : (target_motor_pulse[i] - new_pulse);
-        if (temp <= MOTOR_SPEED_INCREMENT)
+        if (ABS(new_pulse - target_motor_pulse[i]) <= speed_delta)
             new_pulse = target_motor_pulse[i];
         current_motor_pulse[i] = new_pulse;
         motor_set_pwm(i, new_pulse);
