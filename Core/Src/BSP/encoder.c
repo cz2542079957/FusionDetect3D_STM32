@@ -23,7 +23,7 @@ void encoder_tim2_init()
     HAL_GPIO_Init(TIM2_CH2_PORT2, &GPIO_InitStruct);
     __HAL_RCC_AFIO_CLK_ENABLE();
     __HAL_AFIO_REMAP_TIM2_PARTIAL_1();
-    // __HAL_AFIO_REMAP_SWJ_DISABLE(); // 禁用SWD和JTAG调试接口
+    __HAL_AFIO_REMAP_SWJ_NOJTAG();
 
     TIM_Encoder_InitTypeDef sConfig = {0};
     TIM_MasterConfigTypeDef sMasterConfig = {0};
@@ -50,7 +50,7 @@ void encoder_tim2_init()
     if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
     {
     }
-    TIM2->CNT = 0x7fff;
+    TIM2->CNT = 0;
 }
 
 void encoder_tim3_init()
@@ -91,7 +91,7 @@ void encoder_tim3_init()
     if (HAL_TIMEx_MasterConfigSynchronization(&htim3, &sMasterConfig) != HAL_OK)
     {
     }
-    TIM3->CNT = 0x7fff;
+    TIM3->CNT = 0;
 }
 
 void encoder_tim4_init()
@@ -132,7 +132,7 @@ void encoder_tim4_init()
     if (HAL_TIMEx_MasterConfigSynchronization(&htim4, &sMasterConfig) != HAL_OK)
     {
     }
-    TIM4->CNT = 0x7fff;
+    TIM4->CNT = 0;
 }
 
 void encoder_tim5_init()
@@ -173,7 +173,7 @@ void encoder_tim5_init()
     if (HAL_TIMEx_MasterConfigSynchronization(&htim5, &sMasterConfig) != HAL_OK)
     {
     }
-    TIM5->CNT = 0x7fff;
+    TIM5->CNT = 0;
 }
 
 void encoder_init()
@@ -193,24 +193,32 @@ void encoder_init()
     HAL_TIM_Encoder_Start(&htim5, TIM_CHANNEL_1 | TIM_CHANNEL_2);
 }
 
-struct encoder_count_t encoder_count;
+// 分别对应motor1-motor4的编码器
+int16_t encoder_count[ENCODER_NUMS] = {0, 0, 0, 0};
 
 void encoder_update_count()
 {
-    encoder_count.encoder_tim2_count = (short)TIM2->CNT;
-    encoder_count.encoder_tim3_count = (short)TIM3->CNT;
-    encoder_count.encoder_tim4_count = (short)TIM4->CNT;
-    encoder_count.encoder_tim5_count = (short)TIM5->CNT;
-    printf("encoder,tim2:%06d tim3:%06d tim4:%06d tim5:%06d\n",
-           encoder_count.encoder_tim2_count, encoder_count.encoder_tim3_count, encoder_count.encoder_tim4_count, encoder_count.encoder_tim5_count);
+    // 取反为正值，对应正方向
+    encoder_count[0] = -(short)TIM2->CNT;
+    encoder_count[1] = -(short)TIM4->CNT;
+    encoder_count[2] = -(short)TIM5->CNT;
+    encoder_count[3] = -(short)TIM3->CNT;
 
     TIM2->CNT = 0;
     TIM3->CNT = 0;
     TIM4->CNT = 0;
     TIM5->CNT = 0;
+
+    printf("encoder,tim2:%6d tim3:%6d tim4:%6d tim5:%6d\n",
+           encoder_count[0], encoder_count[1], encoder_count[2], encoder_count[3]);
 }
 
-void encoder_on_time(uint16_t interval)
+int16_t *encoder_get_count()
 {
-    encoder_update_count();
+    return encoder_count;
 }
+
+// void encoder_on_time(uint16_t interval)
+// {
+//     encoder_update_count();
+// }

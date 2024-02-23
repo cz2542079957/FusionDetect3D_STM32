@@ -2,7 +2,7 @@
  * @Author: cz2542079957 2542079957@qq.com
  * @Date: 2024-02-18 13:49:37
  * @LastEditors: cz2542079957 2542079957@qq.com
- * @LastEditTime: 2024-02-22 15:19:43
+ * @LastEditTime: 2024-02-23 19:00:31
  * @FilePath: /master/Core/Inc/BSP/common.h
  * @Description:
  *
@@ -11,6 +11,7 @@
 #pragma once
 #include "stm32f1xx.h"
 #include "stdio.h"
+#include "math.h"
 
 // IO口操作宏定义
 #define BITBAND(addr, bitnum) \
@@ -58,12 +59,18 @@
 #define PGout(n) BIT_ADDR(GPIOG_ODR_Addr, n) // 输出
 #define PGin(n) BIT_ADDR(GPIOG_IDR_Addr, n)  // 输入
 
+// 取绝对值
 #define ABS(x) (((x) >= 0) ? (x) : -(x))
+// 最值
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
+// 边界检测，确保值在边界内
+#define ABS_IN_RANGE(x, max_abs) (x) > (max_abs) ? (max_abs) : ((x) < -(max_abs) ? -(max_abs) : (x))
 
 typedef enum
 {
     RETURN_OK = 0,          // 成功
-    RETURN_GEN_FAIL = -1,   // 通用失败
+    RETURN_FAIL = -1,       // 通用失败
     RETURN_INV_PARAM = -2,  // 参数错误
     RETURN_NULL_PTR = -3,   // 指针为空
     RETURN_INV_CONFIG = -4, // 配置错误

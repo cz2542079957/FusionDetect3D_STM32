@@ -32,7 +32,7 @@ return_code_t icm20948_init()
         // Device ID 错误
         if (dev.usr_bank.bank0.bytes.WHO_AM_I != ICM20948_WHO_AM_I_DEFAULT)
         {
-            ret = RETURN_GEN_FAIL;
+            ret = RETURN_FAIL;
         }
     }
 

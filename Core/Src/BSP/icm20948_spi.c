@@ -37,7 +37,7 @@ return_code_t icm20948_spi_init()
     hspi2.Init.CRCPolynomial = 7;                             // 设置CRC多项式（通常在需要CRC校验时使用）
     if (HAL_SPI_Init(&hspi2) != HAL_OK)                       // 初始化SPI2外设
     {
-        return RETURN_GEN_FAIL;
+        return RETURN_FAIL;
     }
     return RETURN_OK;
 }
@@ -56,7 +56,7 @@ return_code_t icm20948_spi_read(uint8_t addr, uint8_t *data, uint32_t len)
     if (status != HAL_OK)
     {
         HAL_GPIO_WritePin(ICM20948_SPI_GPIO_PORT, ICM20948_SPI_GPIO_CS, GPIO_PIN_SET); // 上拉CS信号结束传输
-        return RETURN_GEN_FAIL;
+        return RETURN_FAIL;
     }
 
     // 接收数据
@@ -64,7 +64,7 @@ return_code_t icm20948_spi_read(uint8_t addr, uint8_t *data, uint32_t len)
 
     HAL_GPIO_WritePin(ICM20948_SPI_GPIO_PORT, ICM20948_SPI_GPIO_CS, GPIO_PIN_SET); // 上拉CS信号结束传输
 
-    return status != HAL_OK ? RETURN_GEN_FAIL : RETURN_OK;
+    return status != HAL_OK ? RETURN_FAIL : RETURN_OK;
 }
 
 return_code_t icm20948_spi_write(uint8_t addr, uint8_t *data, uint32_t len)
@@ -81,5 +81,5 @@ return_code_t icm20948_spi_write(uint8_t addr, uint8_t *data, uint32_t len)
 
     HAL_GPIO_WritePin(ICM20948_SPI_GPIO_PORT, ICM20948_SPI_GPIO_CS, GPIO_PIN_SET); // 上拉CS信号结束传输
 
-    return status != HAL_OK ? RETURN_GEN_FAIL : RETURN_OK;
+    return status != HAL_OK ? RETURN_FAIL : RETURN_OK;
 }

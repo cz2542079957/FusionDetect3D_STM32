@@ -2,10 +2,10 @@
 #pragma once
 #include "common.h"
 
-#define MOTOR_ENABLE_A (0x01)
-#define MOTOR_ENABLE_B (0x02)
-#define MOTOR_ENABLE_C (0x04)
-#define MOTOR_ENABLE_D (0x08)
+#define MOTOR_ENABLE_1 (0x01) // 右下方电机
+#define MOTOR_ENABLE_2 (0x02) // 左下方电机
+#define MOTOR_ENABLE_3 (0x04) // 右上方电机
+#define MOTOR_ENABLE_4 (0x08) // 左上方电机
 
 /* GPIO */
 #define M1A_PORT GPIOA
@@ -41,6 +41,15 @@
 #define PWM_M4_A TIM1->CCR2
 #define PWM_M4_B TIM1->CCR3
 
+#define MOTOR_PULSE_MAX 3600        // 电机脉冲最大值
+#define MOTOR_PULSE_MIN -3600       // 电机脉冲最小值
+#define MOTOR_IGNORE_PULSE 2000     // 电机死区校正值
+#define MOTOR_PULSE_INCREMENT_COE 1 // 速度根据时间的变化系数
+
+#define MOTOR_PULSE_BIAS_CALCULATION_PARAMETER_1 2  // 电机脉冲偏置计算参数1
+#define MOTOR_PULSE_BIAS_CALCULATION_PARAMETER_2 30 // 电机脉冲偏置计算参数2
+#define MOTOR_MAX_PULSE_BIAS 200                    // 最大脉冲校正偏置值
+
 typedef enum
 {
     MOTOR_ID_M1 = 0,
@@ -53,13 +62,6 @@ typedef enum
 // 电机状态
 typedef enum
 {
-    // 电机速度最值
-    MOTOR_SPEED_MAX = 3600,
-    MOTOR_SPEED_MIN = -3600,
-    // 电机死区校正值
-    MOTOR_IGNORE_PULSE = 2000,
-    // 速度根据时间的变化系数
-    MOTOR_SPEED_INCREMENT_COE = 1,
     MOTOR_FRONT = 1,
     MOTOR_BACK = -1,
     MOTOR_STOP = 0
@@ -72,3 +74,8 @@ void motor_stop();
 // 设置电机脉冲(0-1600)
 void motor_set_pwm(Motor_ID id, int16_t pulse);
 void motor_set_all_pwm(int16_t pulse);
+// 电机脉冲校正计算
+float motor_pulse_bias_calculation(int16_t encoder_count_delta);
+// 设置误差校正
+void motor_get_all_bias(int16_t *bias);
+void motor_set_all_bias(int16_t *bias);

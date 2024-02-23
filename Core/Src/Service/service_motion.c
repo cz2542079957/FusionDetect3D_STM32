@@ -1,5 +1,7 @@
 #include "service_motion.h"
 
+/*private*/
+
 // 当前运动状态
 int8_t motion_state = MOTION_STOP;
 // 当前电机脉冲
@@ -13,6 +15,15 @@ int16_t motion_speed_to_pulse(int16_t speed)
     return speed * 16;
 }
 
+/*public*/
+return_code_t motion_init()
+{
+    // motor初始化
+    motor_init();
+    // 编码器初始化
+    encoder_init();
+    return RETURN_OK;
+}
 void motion_stop()
 {
     for (int i = 0; i < MOTOR_NUMS; i++)
@@ -231,24 +242,63 @@ void motion_on_time(uint16_t interval)
 {
     // printf("motion_state: %d\n", motion_state);
 
-    // printf("current: %d %d %d %d; target: %d %d %d %d\n", current_motor_pulse[0], current_motor_pulse[1],
-    //        current_motor_pulse[2], current_motor_pulse[3], target_motor_pulse[0], target_motor_pulse[1],
-    //        target_motor_pulse[2], target_motor_pulse[3]);
+    // printf("current: %d %d %d %d; target: %d %d %d %d\n", current_motor_pulse[0], current_motor_pulse[1], current_motor_pulse[2], current_motor_pulse[3],
+    //        target_motor_pulse[0], target_motor_pulse[1], target_motor_pulse[2], target_motor_pulse[3]);
 
     for (uint16_t i = 0; i < MOTOR_NUMS; i++)
     {
         if (current_motor_pulse[i] == target_motor_pulse[i])
+        {
+            motor_set_pwm(i, target_motor_pulse[i]); // 为了应用新的bias值
             continue;
-        int16_t speed_delta = MOTOR_SPEED_INCREMENT_COE * interval;
+        }
+        int16_t pulse_delta = MOTOR_PULSE_INCREMENT_COE * interval;
         int16_t new_pulse = target_motor_pulse[i] > current_motor_pulse[i]
-                                ? (current_motor_pulse[i] + speed_delta)
-                                : (current_motor_pulse[i] - speed_delta);
+                                ? (current_motor_pulse[i] + pulse_delta)
+                                : (current_motor_pulse[i] - pulse_delta);
         // 如果距离目标较小，则直接赋值相等
-        if (ABS(new_pulse - target_motor_pulse[i]) <= speed_delta)
+        if (ABS(new_pulse - target_motor_pulse[i]) <= pulse_delta)
             new_pulse = target_motor_pulse[i];
         current_motor_pulse[i] = new_pulse;
         motor_set_pwm(i, new_pulse);
     }
+}
+
+void motion_closed_loop_control()
+{
+    // 更新计数
+    encoder_update_count();
+    int16_t bias[MOTOR_NUMS] = {0, 0, 0, 0};
+    if (motion_state == MOTION_STOP)
+    {
+        motor_set_all_bias(bias);
+        return;
+    }
+    // 获取当前编码器计数
+    int16_t *temp = encoder_get_count();
+    // 计算平均值的绝对值
+    int16_t avr_count = ABS((temp[0] + temp[1] + temp[2] + temp[3]) / ENCODER_NUMS);
+    // 获取当前偏差
+    motor_get_all_bias(bias);
+    // 计算偏差
+    for (int i = 0; i < MOTOR_NUMS; i++)
+    {
+        int16_t abs_temp = ABS(temp[i]);
+        int16_t delta = ABS(abs_temp - avr_count);
+        if (abs_temp > avr_count)
+            bias[i] = -motor_pulse_bias_calculation(delta);
+        else if (abs_temp < avr_count)
+            bias[i] = motor_pulse_bias_calculation(delta);
+        else
+            bias[i] = 0;
+
+        bias[i] = ABS_IN_RANGE(bias[i], MOTOR_MAX_PULSE_BIAS);
+    }
+    // 打印所有bias
+    // printf("bias: %d %d %d %d\n", bias[0], bias[1], bias[2], bias[3]);
+
+    // 应用bias
+    motor_set_all_bias(bias);
 }
 
 void motion_parse_command(Motion_State state, uint16_t speed)

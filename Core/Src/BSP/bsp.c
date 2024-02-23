@@ -23,10 +23,9 @@ void bsp_init()
     led_init();
     // 蜂鸣器初始化
     beep_init();
-    // motor初始化
-    motor_init();
-    // 编码器初始化
-    encoder_init();
+    // 运动控制初始化
+    ret = motion_init();
+
     // icm20948初始化
     ret = icm20948_init();
 
@@ -49,8 +48,6 @@ void bsp_init()
 }
 void main_on_time(uint16_t interval)
 {
-    // motor - motion
-    motion_on_time(interval);
 }
 
 void sub_on_time(uint16_t interval)
@@ -61,10 +58,13 @@ void sub_on_time(uint16_t interval)
     led_on_time(interval);
     // beep
     beep_on_time(interval);
+
+    // 动力装置闭环控制
+    motion_closed_loop_control();
+    // motor - motion
+    motion_on_time(interval);
     // 服务
     on_time_service();
-    // 电机编码器
-    encoder_on_time(interval);
 }
 
 /*实现 */

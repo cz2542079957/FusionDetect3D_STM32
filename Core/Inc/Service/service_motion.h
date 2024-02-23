@@ -1,5 +1,6 @@
 #pragma once
 #include "motor.h"
+#include "encoder.h"
 
 // 运动状态
 typedef enum
@@ -21,7 +22,11 @@ typedef enum
     MOTION_TURN_BACK_LEFT,
 } Motion_State;
 
+// 初始化
+return_code_t motion_init();
+
 // 运动控制(速度值0-100)
+void motion_stop();                          // 停止
 void motion_go_forward(int16_t speed);       // 前进
 void motion_go_backward(int16_t speed);      // 后退
 void motion_go_right(int16_t speed);         // 右移
@@ -36,10 +41,11 @@ void motion_turn_front_right(int16_t speed); // 绕前轮中点右旋
 void motion_turn_front_left(int16_t speed);  // 绕前轮中点左旋
 void motion_turn_back_right(int16_t speed);  // 绕后轮中点右旋
 void motion_turn_back_left(int16_t speed);   // 绕后轮中点左旋
-void motion_stop();                          // 停止
 
 // 轮询函数
 void motion_on_time(uint16_t interval);
+// 闭环控制函数
+void motion_closed_loop_control();
 // 控制命令解析函数
 void motion_parse_command(Motion_State state, uint16_t speed);
 

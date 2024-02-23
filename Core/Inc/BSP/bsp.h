@@ -5,7 +5,6 @@
 #include "key1.h"
 #include "led.h"
 #include "icm20948_api.h"
-#include "encoder.h"
 
 #include "service_motion.h"
 
