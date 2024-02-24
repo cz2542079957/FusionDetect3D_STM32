@@ -209,8 +209,8 @@ void encoder_update_count()
     TIM4->CNT = 0;
     TIM5->CNT = 0;
 
-    printf("encoder,tim2:%6d tim3:%6d tim4:%6d tim5:%6d\n",
-           encoder_count[0], encoder_count[1], encoder_count[2], encoder_count[3]);
+    // printf("encoder,tim2:%6d tim3:%6d tim4:%6d tim5:%6d\n",
+    //        encoder_count[0], encoder_count[1], encoder_count[2], encoder_count[3]);
 }
 
 int16_t *encoder_get_count()

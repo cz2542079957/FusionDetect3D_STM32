@@ -237,7 +237,8 @@ float motor_pulse_bias_calculation(int16_t encoder_count_delta)
     if (encoder_count_delta <= 1)
         return 1;
     else if (encoder_count_delta > 1)
-        return powf(encoder_count_delta, MOTOR_PULSE_BIAS_CALCULATION_PARAMETER_1) * MOTOR_PULSE_BIAS_CALCULATION_PARAMETER_2;
+        // return powf(encoder_count_delta, MOTOR_PULSE_BIAS_CALCULATION_PARAMETER_1) * MOTOR_PULSE_BIAS_CALCULATION_PARAMETER_2;
+        return encoder_count_delta * encoder_count_delta * MOTOR_PULSE_BIAS_CALCULATION_PARAMETER_2;
     return 0;
 }
 

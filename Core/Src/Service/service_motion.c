@@ -277,7 +277,7 @@ void motion_closed_loop_control()
     // 获取当前编码器计数
     int16_t *temp = encoder_get_count();
     // 计算平均值的绝对值
-    int16_t avr_count = ABS((temp[0] + temp[1] + temp[2] + temp[3]) / ENCODER_NUMS);
+    int16_t avr_count = (ABS(temp[0]) + ABS(temp[1]) + ABS(temp[2]) + ABS(temp[3])) / ENCODER_NUMS;
     // 获取当前偏差
     motor_get_all_bias(bias);
     // 计算偏差
