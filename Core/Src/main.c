@@ -1,6 +1,6 @@
 #include "main.h"
 
-uint8_t main_tick = 0;
+uint16_t main_tick = 0;
 
 int main(void)
 {
@@ -14,14 +14,20 @@ int main(void)
     while (1)
     {
         /*
-        main循环每个MAIN_LOOP_CYCLE执行一次
-        sub循环每2个MAIN_LOOP_CYCLE执行一次(1个SUB_LOOP_CYCLE)
+        fast循环每 FAST_LOOP_CYCLE_TICKS 个 MAIN_LOOP_CYCLE 执行一次
+        normal循环每 NORMAL_LOOP_CYCLE_TICKS 个 MAIN_LOOP_CYCLE 执行一次
+        slow循环每 SLOW_LOOP_CYCLE_TICKS 个 MAIN_LOOP_CYCLE 执行一次
+        slowest循环每 SLOWEST_LOOP_CYCLE_TICKS 个 MAIN_LOOP_CYCLE 执行一次
         */
-        main_on_time(MAIN_LOOP_CYCLE);
-        if (main_tick % 2 == 0)
-            sub_on_time(SUB_LOOP_CYCLE);
-        HAL_Delay(MAIN_LOOP_CYCLE);
+        fast_on_time(FAST_LOOP_CYCLE_TICKS * MAIN_LOOP_CYCLE);
+        if (main_tick % NORMAL_LOOP_CYCLE_TICKS == 0)
+            normal_on_time(NORMAL_LOOP_CYCLE_TICKS * MAIN_LOOP_CYCLE);
+        if (main_tick % SLOW_LOOP_CYCLE_TICKS == 0)
+            slow_on_time(SLOW_LOOP_CYCLE_TICKS * MAIN_LOOP_CYCLE);
+        if (main_tick % SLOWEST_LOOP_CYCLE_TICKS == 0)
+            slowest_on_time(SLOWEST_LOOP_CYCLE_TICKS * MAIN_LOOP_CYCLE);
         main_tick++;
+        HAL_Delay(MAIN_LOOP_CYCLE);
     }
     // beep_sound_end();
 }

@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 #include "icm20948_api.h"
+#include "icm20948_dmp.h"
+#include "icm20948_spi.h"
 
 #define ICM20948_BANK0_REG_COUNT (65)
 #define ICM20948_BANK1_REG_COUNT (14)
@@ -28,8 +30,15 @@ typedef enum
 {
     ICM20948_ADDR_WHO_AM_I = 0x00,
     ICM20948_ADDR_USER_CTRL = 0x03,
+    ICM20948_ADDR_LP_CONFIG = 0x05,
     ICM20948_ADDR_PWR_MGMT_1 = 0x06,
     ICM20948_ADDR_PWR_MGMT_2 = 0x07,
+    ICM20948_ADDR_AK09916_WHO_AM_I = 0x0c,
+    ICM20948_ADDR_INT_ENABLE = 0x10,
+    ICM20948_ADDR_INT_ENABLE_1 = 0x11,
+    ICM20948_ADDR_INT_ENABLE_2 = 0x12,
+    ICM20948_ADDR_INT_ENABLE_3 = 0x12,
+    ICM20948_ADDR_SINGLE_FIFO_PRIORITY_SEL = 0x26,
     ICM20948_ADDR_ACCEL_XOUT_H = 0x2D,
     ICM20948_ADDR_ACCEL_XOUT_L = 0x2E,
     ICM20948_ADDR_ACCEL_YOUT_H = 0x2F,
@@ -46,15 +55,25 @@ typedef enum
     ICM20948_ADDR_TEMP_OUT_L = 0x3A,
     ICM20948_ADDR_FIFO_EN_1 = 0x66,
     ICM20948_ADDR_FIFO_EN_2 = 0x67,
+    ICM20948_ADDR_FIFO_RST = 0x68,
     ICM20948_ADDR_FIFO_MODE = 0x69,
     ICM20948_ADDR_FIFO_COUNTH = 0x70,
     ICM20948_ADDR_FIFO_COUNTL = 0x71,
     ICM20948_ADDR_FIFO_R_W = 0x72,
 
+    ICM20948_ADDR_DATA_RDY_STATUS = 0x74,
+    ICM20948_ADDR_HW_FIX_DISABLE = 0x75,
+    ICM20948_ADDR_FIFO_CFG = 0x76,
+
     ICM20948_ADDR_MEM_START_ADDR = 0x7C,
     ICM20948_ADDR_MEM_R_W = 0x7D,
     ICM20948_ADDR_MEM_BANK_SEL = 0x7E,
 } icm20948_reg_bank0_addr_t;
+
+typedef enum
+{
+    ICM20948_ADDR_TIMEBASE_CORRECTION_PLL = 0x28,
+} icm20948_reg_bank1_addr_t;
 
 typedef enum
 {
@@ -68,6 +87,40 @@ typedef enum
     ICM20948_ADDR_PRGM_START_ADDRL = 0x51,
     ICM20948_ADDR_MOD_CTRL_USR = 0x54,
 } icm20948_reg_bank2_addr_t;
+
+typedef enum
+{
+    ICM20948_ADDR_I2C_MST_ODR_CONFIG = 0x00,
+    ICM20948_ADDR_I2C_MST_CTRL = 0x01,
+    ICM20948_ADDR_I2C_MST_DELAY_CTRL = 0x02,
+
+    ICM20948_ADDR_I2C_SLV0_ADDR = 0x03,
+    ICM20948_ADDR_I2C_SLV0_REG = 0x04,
+    ICM20948_ADDR_I2C_SLV0_CTRL = 0x05,
+    ICM20948_ADDR_I2C_SLV0_DO = 0x06,
+
+    ICM20948_ADDR_I2C_SLV1_ADDR = 0x07,
+    ICM20948_ADDR_I2C_SLV1_REG = 0x08,
+    ICM20948_ADDR_I2C_SLV1_CTRL = 0x09,
+    ICM20948_ADDR_I2C_SLV1_DO = 0x0A,
+
+    ICM20948_ADDR_I2C_SLV2_ADDR = 0x0B,
+    ICM20948_ADDR_I2C_SLV2_REG = 0x0C,
+    ICM20948_ADDR_I2C_SLV2_CTRL = 0x0D,
+    ICM20948_ADDR_I2C_SLV2_DO = 0x0E,
+
+    ICM20948_ADDR_I2C_SLV3_ADDR = 0x0F,
+    ICM20948_ADDR_I2C_SLV3_REG = 0x10,
+    ICM20948_ADDR_I2C_SLV3_CTRL = 0x11,
+    ICM20948_ADDR_I2C_SLV3_DO = 0x12,
+
+    ICM20948_ADDR_I2C_SLV4_ADDR = 0x13,
+    ICM20948_ADDR_I2C_SLV4_REG = 0x14,
+    ICM20948_ADDR_I2C_SLV4_CTRL = 0x15,
+    ICM20948_ADDR_I2C_SLV4_DO = 0x16,
+    ICM20948_ADDR_I2C_SLV4_DI = 0x17,
+
+} icm20948_reg_bank3_addr_t;
 
 typedef union
 {
@@ -759,3 +812,78 @@ typedef struct
 {
     icm20948_usr_bank_t usr_bank;
 } icm20948_dev_t;
+
+#define AK09916_WHO_AM_I_DEFAULT 0x4809
+
+typedef enum
+{
+    AK09916_mode_power_down = 0x00,
+    AK09916_mode_single = (0x01 << 0),
+    AK09916_mode_cont_10hz = (0x01 << 1),
+    AK09916_mode_cont_20hz = (0x02 << 1),
+    AK09916_mode_cont_50hz = (0x03 << 1),
+    AK09916_mode_cont_100hz = (0x04 << 1),
+    AK09916_mode_self_test = (0x01 << 4),
+} AK09916_mode_e;
+
+typedef enum
+{
+    AK09916_REG_WIA1 = 0x00,
+    AK09916_REG_WIA2,
+    AK09916_REG_RSV1,
+    AK09916_REG_RSV2, // Reserved register. We start reading here when using the DMP. Secret sauce...
+    // discontinuity - containing another nine reserved registers? Secret sauce...
+    AK09916_REG_ST1 = 0x10,
+    AK09916_REG_HXL,
+    AK09916_REG_HXH,
+    AK09916_REG_HYL,
+    AK09916_REG_HYH,
+    AK09916_REG_HZL,
+    AK09916_REG_HZH,
+    // discontinuity
+    AK09916_REG_ST2 = 0x18,
+    // discontinuity
+    AK09916_REG_CNTL2 = 0x31,
+    AK09916_REG_CNTL3,
+} AK09916_Reg_Addr_e;
+
+typedef struct
+{
+    uint8_t WIA1;
+} AK09916_WIA1_Reg_t;
+
+typedef struct
+{
+    uint8_t WIA2;
+} AK09916_WIA2_Reg_t;
+
+typedef struct
+{
+    uint8_t DRDY : 1;
+    uint8_t DOR : 1;
+    uint8_t reserved_0 : 6;
+} AK09916_ST1_Reg_t;
+
+typedef struct
+{
+    uint8_t reserved_0 : 3;
+    uint8_t HOFL : 1;
+    uint8_t reserved_1 : 4;
+} AK09916_ST2_Reg_t;
+
+typedef struct
+{
+    uint8_t MODE : 5;
+    uint8_t reserved_0 : 3;
+} AK09916_CNTL2_Reg_t;
+
+typedef struct
+{
+    uint8_t SRST : 1;
+    uint8_t reserved_0 : 7;
+} AK09916_CNTL3_Reg_t;
+
+#define INV_MAX_SERIAL_READ 16
+#define INV_MAX_SERIAL_WRITE 16
+
+return_code_t icm20948_select_bank(icm20948_reg_bank_sel_t reg_bank_sel);

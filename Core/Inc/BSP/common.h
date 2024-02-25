@@ -2,7 +2,7 @@
  * @Author: cz2542079957 2542079957@qq.com
  * @Date: 2024-02-18 13:49:37
  * @LastEditors: cz2542079957 2542079957@qq.com
- * @LastEditTime: 2024-02-23 19:00:31
+ * @LastEditTime: 2024-02-24 15:30:53
  * @FilePath: /master/Core/Inc/BSP/common.h
  * @Description:
  *
@@ -11,6 +11,8 @@
 #pragma once
 #include "stm32f1xx.h"
 #include "stdio.h"
+#include "stdbool.h"
+#include "stdint.h"
 #include "math.h"
 
 // IO口操作宏定义

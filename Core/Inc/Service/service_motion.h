@@ -44,8 +44,6 @@ void motion_turn_back_left(int16_t speed);   // 绕后轮中点左旋
 
 // 轮询函数
 void motion_on_time(uint16_t interval);
-// 闭环控制函数
-void motion_closed_loop_control();
 // 控制命令解析函数
 void motion_parse_command(Motion_State state, uint16_t speed);
 

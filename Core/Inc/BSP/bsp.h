@@ -1,11 +1,11 @@
 #pragma once
 #include "uart.h"
-
 #include "beep.h"
 #include "key1.h"
 #include "led.h"
 #include "icm20948_api.h"
 
+#include "service_battery.h"
 #include "service_motion.h"
 
 // 帧头
@@ -34,7 +34,11 @@ typedef enum
 // 硬件初始化
 void bsp_init();
 
-// 主周期轮询
-void main_on_time(uint16_t interval);
-// 次周期轮询
-void sub_on_time(uint16_t interval);
+// 快周期轮询
+void fast_on_time(uint16_t interval);
+// 一般周期轮询
+void normal_on_time(uint16_t interval);
+// 慢周期轮询
+void slow_on_time(uint16_t interval);
+// 特慢周期轮询
+void slowest_on_time(uint16_t interval);

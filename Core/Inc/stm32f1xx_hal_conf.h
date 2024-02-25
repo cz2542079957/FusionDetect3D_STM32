@@ -4,7 +4,7 @@
 /* ########################## Module Selection ############################## */
 
 #define HAL_MODULE_ENABLED
-/*#define HAL_ADC_MODULE_ENABLED   */
+#define HAL_ADC_MODULE_ENABLED
 /*#define HAL_CRYP_MODULE_ENABLED   */
 /*#define HAL_CAN_MODULE_ENABLED   */
 /*#define HAL_CAN_LEGACY_MODULE_ENABLED   */
@@ -352,9 +352,5 @@ void assert_failed(uint8_t *file, uint32_t line);
 #else
 #define assert_param(expr) ((void)0U)
 #endif /* USE_FULL_ASSERT */
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* __STM32F1xx_HAL_CONF_H */

@@ -77,7 +77,7 @@ return_code_t icm20948_spi_write(uint8_t addr, uint8_t *data, uint32_t len)
     memcpy(&tx_buffer[1], data, len);
 
     // 执行SPI传输
-    HAL_StatusTypeDef status = HAL_SPI_Transmit(&hspi2, tx_buffer, len + 1, 0xffff);
+    HAL_StatusTypeDef status = HAL_SPI_Transmit(&hspi2, tx_buffer, len + 1, 100);
 
     HAL_GPIO_WritePin(ICM20948_SPI_GPIO_PORT, ICM20948_SPI_GPIO_CS, GPIO_PIN_SET); // 上拉CS信号结束传输
 

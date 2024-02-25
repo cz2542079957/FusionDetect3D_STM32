@@ -17,13 +17,15 @@ void bsp_init()
     return_code_t ret = RETURN_OK;
     // 串口通讯初始化
     uart_init();
+    // ADC初始化
+    adc_init();
     // 板载按键1初始化
     key1_init();
     //  led灯初始化
     led_init();
     // 蜂鸣器初始化
     beep_init();
-    // 运动控制初始化
+    // 运动控制初始化(包含了motor和encoder初始化)
     ret = motion_init();
 
     // icm20948初始化
@@ -31,26 +33,25 @@ void bsp_init()
 
     // while (1)
     // {
-    //     // uint16_t count = icm20948_get_fifo_count();
+    //     uint16_t count = icm20948_get_fifo_count();
     //     // HAL_Delay(10);
     //     // // uint8_t *data;
     //     // // data = icm20948_read_fifo(count);
     //     // uint8_t data1 = icm20948_read();
     //     // HAL_Delay(10);
-    //     // // printf("debug:%d\n", count);
+    //     printf("debug:%d\n", count);
     //     // if (count > 0)
     //     // {
     //     //     beep_once(10);
     //     // }
     //     HAL_Delay(10);
-    //     encoder_update_count();
     // }
 }
-void main_on_time(uint16_t interval)
+void fast_on_time(uint16_t interval)
 {
 }
 
-void sub_on_time(uint16_t interval)
+void normal_on_time(uint16_t interval)
 {
     // key1
     key1_on_time(interval);
@@ -58,13 +59,24 @@ void sub_on_time(uint16_t interval)
     led_on_time(interval);
     // beep
     beep_on_time(interval);
-
-    // 动力装置闭环控制
-    motion_closed_loop_control();
-    // motor - motion
+    // motion
     motion_on_time(interval);
+
     // 服务
     on_time_service();
+}
+
+void slow_on_time(uint16_t interval)
+{
+    // 电池电压
+    battery_on_time(interval);
+}
+
+void slowest_on_time(uint16_t interval)
+{
+    uint16_t v = battery_get_voltage();
+    // 打印
+    printf("voltage:%d\n", v);
 }
 
 /*实现 */

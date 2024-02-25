@@ -1,8 +1,6 @@
 
 #pragma once
-#include <stdbool.h>
-#include <stdint.h>
-#include "icm20948_spi.h"
+#include "common.h"
 
 typedef enum
 {
