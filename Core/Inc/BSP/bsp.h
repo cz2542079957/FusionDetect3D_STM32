@@ -33,12 +33,3 @@ typedef enum
 
 // 硬件初始化
 void bsp_init();
-
-// 快周期轮询
-void fast_on_time(uint16_t interval);
-// 一般周期轮询
-void normal_on_time(uint16_t interval);
-// 慢周期轮询
-void slow_on_time(uint16_t interval);
-// 特慢周期轮询
-void slowest_on_time(uint16_t interval);

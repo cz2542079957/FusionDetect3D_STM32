@@ -27,10 +27,11 @@ int main(void)
         if (main_tick % SLOWEST_LOOP_CYCLE_TICKS == 0)
             slowest_on_time(SLOWEST_LOOP_CYCLE_TICKS * MAIN_LOOP_CYCLE);
         main_tick++;
-        HAL_Delay(MAIN_LOOP_CYCLE);
+        HAL_Delay(MAIN_LOOP_CYCLE - 1);
     }
     // beep_sound_end();
 }
+
 void SystemClock_Config(void)
 {
     RCC_OscInitTypeDef RCC_OscInitStruct = {0};

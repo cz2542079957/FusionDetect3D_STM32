@@ -1,4 +1,6 @@
 #include "bsp.h"
+#include "main.h" //实现轮询函数
+
 // 是否开启校验和
 int enable_check_sum = FRAME_ENABLE_CHECK_SUM;
 
@@ -70,6 +72,7 @@ void slow_on_time(uint16_t interval)
 {
     // 电池电压
     battery_on_time(interval);
+    printf("debug\n");
 }
 
 void slowest_on_time(uint16_t interval)
