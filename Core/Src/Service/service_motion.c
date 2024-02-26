@@ -54,14 +54,7 @@ void motion_closed_loop_control()
 }
 
 /*public*/
-return_code_t motion_init()
-{
-    // motor初始化
-    motor_init();
-    // 编码器初始化
-    encoder_init();
-    return RETURN_OK;
-}
+
 void motion_stop()
 {
     for (int i = 0; i < MOTOR_NUMS; i++)

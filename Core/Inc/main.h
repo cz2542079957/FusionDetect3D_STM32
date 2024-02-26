@@ -2,21 +2,14 @@
  * @Author: cz2542079957 2542079957@qq.com
  * @Date: 2024-02-09 15:56:01
  * @LastEditors: cz2542079957 2542079957@qq.com
- * @LastEditTime: 2024-02-25 13:06:36
+ * @LastEditTime: 2024-02-26 15:31:28
  * @FilePath: /master/Core/Inc/main.h
  * @Description:
  *
  * Copyright (c) 2024 by ${git_name_email}, All Rights Reserved.
  */
 #pragma once
-
-#include <stdio.h>
 #include "bsp.h"
-#include "stm32f1xx.h"
-
-void SystemClock_Config(void);
-void SysTick_Handler(void);
-void Error_Handler(void);
 
 /**
  * @description: 四级轮询函数

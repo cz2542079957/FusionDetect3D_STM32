@@ -9,7 +9,9 @@
 #define BEEP_STATE_ON 1
 #define BEEP_STATE_OFF 0
 
+// 初始化
 void beep_init();
+// 发出一次声音
 void beep_once(int16_t time);
 // 发出开启时的声音
 void beep_sound_start();

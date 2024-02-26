@@ -31,7 +31,7 @@ void battery_check_voltage()
 }
 
 /* public */
-void battery_on_time(uint16_t interval)
+void service_battery_on_time(uint16_t interval)
 {
     if (remain_time > 0)
     {

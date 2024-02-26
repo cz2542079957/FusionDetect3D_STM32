@@ -1,13 +1,3 @@
-/*
- * @Author: cz2542079957 2542079957@qq.com
- * @Date: 2024-02-18 13:49:37
- * @LastEditors: cz2542079957 2542079957@qq.com
- * @LastEditTime: 2024-02-25 13:07:14
- * @FilePath: /master/Core/Inc/BSP/common.h
- * @Description:
- *
- * Copyright (c) 2024 by ${git_name_email}, All Rights Reserved.
- */
 #pragma once
 #include "stm32f1xx.h"
 #include "stdio.h"
@@ -16,8 +6,7 @@
 #include "math.h"
 
 // IO口操作宏定义
-#define BITBAND(addr, bitnum) \
-    ((addr & 0xF0000000) + 0x2000000 + ((addr & 0xFFFFF) << 5) + (bitnum << 2))
+#define BITBAND(addr, bitnum) ((addr & 0xF0000000) + 0x2000000 + ((addr & 0xFFFFF) << 5) + (bitnum << 2))
 #define MEM_ADDR(addr) *((volatile unsigned long *)(addr))
 #define BIT_ADDR(addr, bitnum) MEM_ADDR(BITBAND(addr, bitnum))
 
@@ -78,3 +67,5 @@ typedef enum
     RETURN_INV_CONFIG = -4, // 配置错误
     RETURN_TIMEOUT = -5     // 超时
 } return_code_t;
+
+void Error_Handler(void);

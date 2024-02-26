@@ -7,6 +7,6 @@
 #define BATTERY_COMPUTE_AVG_INTERVAL 1000
 
 // 周期函数
-void battery_on_time(uint16_t interval);
+void service_battery_on_time(uint16_t interval);
 // 获取最后一次计算的平均电压（mV）(由于不使用浮点数，所以乘以1000表示mV)
 uint16_t battery_get_voltage();

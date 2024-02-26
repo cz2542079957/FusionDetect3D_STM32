@@ -1,10 +1,11 @@
 #include "uart.h"
 #include <string.h>
 
+/* private */
 UART_HandleTypeDef huart1;
 DMA_HandleTypeDef hdma_usart1_tx;
 
-struct Uart_Buffer uart_buffer;
+struct Uart_Buffer uart_buffer; // 接收缓冲区
 
 // 重定向printf
 int __io_putchar(int ch)
@@ -12,15 +13,27 @@ int __io_putchar(int ch)
     HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 0xffff);
     return ch;
 }
+
+// 中断处理函数
+void USART1_IRQHandler(void)
+{
+    if ((__HAL_UART_GET_FLAG(&huart1, UART_FLAG_RXNE) != RESET) &&
+        (__HAL_UART_GET_IT_SOURCE(&huart1, UART_IT_RXNE) != RESET))
+    {
+        uint8_t temp = USART1->DR;
+        uart_recv(temp);
+        HAL_UART_Receive_IT(&huart1, &temp, 1);
+        __HAL_UART_CLEAR_FLAG(&huart1, UART_FLAG_RXNE);
+    }
+}
+
 uint8_t uart_is_buffer_empty() { return uart_buffer.size == 0; }
 
-uint8_t uart_is_buffer_full()
-{
-    return uart_buffer.size >= (UART_BUFFER_SIZE - 1);
-}
+uint8_t uart_is_buffer_full() { return uart_buffer.size >= (UART_BUFFER_SIZE - 1); }
 
 uint16_t uart_get_index(uint16_t index) { return index % UART_BUFFER_SIZE; }
 
+#ifdef UART_ENABLE_DMA
 void uart_dma_init()
 {
     // USART1 DMA Init
@@ -39,25 +52,27 @@ void uart_dma_init()
     // 开启dma中断
     HAL_NVIC_SetPriority(DMA1_Channel4_IRQn, 1, 0);
     HAL_NVIC_EnableIRQ(DMA1_Channel4_IRQn);
-
     // __HAL_LINKDMA(&huart1, hdmatx, hdma_usart1_tx);
 }
+#endif
+
+/* public */
+
 void uart_init()
 {
-
     // 开启USART1时钟和GPIO时钟
     __HAL_RCC_USART1_CLK_ENABLE();
     __HAL_RCC_GPIOA_CLK_ENABLE();
     GPIO_InitTypeDef GPIO_InitStruct = {0};
-    GPIO_InitStruct.Pin = GPIO_PIN_9;
+    GPIO_InitStruct.Pin = UART_UART1_TX_PIN;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+    HAL_GPIO_Init(UART_UART1_PORT, &GPIO_InitStruct);
 
-    GPIO_InitStruct.Pin = GPIO_PIN_10;
+    GPIO_InitStruct.Pin = UART_UART1_RX_PIN;
     GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+    HAL_GPIO_Init(UART_UART1_PORT, &GPIO_InitStruct);
 
     // USART1
     huart1.Instance = USART1;
@@ -72,12 +87,17 @@ void uart_init()
     {
         // 错误处理
     }
-    HAL_NVIC_SetPriority(USART1_IRQn, 1, 0);
+
+    // 启动中断
+    HAL_NVIC_SetPriority(USART1_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ(USART1_IRQn);
     uint8_t rx_data;
     HAL_UART_Receive_IT(&huart1, &rx_data, 1);
 
+#ifdef UART_ENABLE_DMA
+    // 启动dma
     uart_dma_init();
+#endif
 
     // 数据结构初始化
     memset(uart_buffer.data, 0, UART_BUFFER_SIZE);
@@ -99,29 +119,5 @@ void uart_recv(uint8_t data)
 
 void uart_send(uint8_t *data, uint16_t length)
 {
-    HAL_UART_Transmit(&huart1, data, length, 10000);
-}
-
-void uart_data_handler()
-{
-    uint8_t senddata[3] = {0xff, (uint8_t)(uart_buffer.size >> 8),
-                           (uint8_t)(uart_buffer.size & 0xff)};
-    uart_send(senddata, 3);
-}
-
-void uart_on_time(uint16_t interval)
-{
-    // printf("out:%d \r\n", uart_buffer.size);
-}
-
-// 中断处理函数
-void USART1_IRQHandler(void)
-{
-    if ((__HAL_UART_GET_FLAG(&huart1, UART_FLAG_RXNE) != RESET) &&
-        (__HAL_UART_GET_IT_SOURCE(&huart1, UART_IT_RXNE) != RESET))
-    {
-        uint8_t Rx1_Temp = USART1->DR;
-        uart_recv(Rx1_Temp);
-        __HAL_UART_CLEAR_FLAG(&huart1, UART_FLAG_RXNE);
-    }
+    HAL_UART_Transmit_DMA(&huart1, data, length);
 }

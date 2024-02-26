@@ -1,19 +1,44 @@
 #include "bsp.h"
-#include "main.h" //实现轮询函数
+void SystemClock_Config(void)
+{
+    RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+    RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
-// 是否开启校验和
-int enable_check_sum = FRAME_ENABLE_CHECK_SUM;
+    /** Initializes the RCC Oscillators according to the specified parameters
+     * in the RCC_OscInitTypeDef structure.
+     */
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+    RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+    RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
+    RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+    RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
+    if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+    {
+        Error_Handler();
+    }
 
-/*private*/
+    /** Initializes the CPU, AHB and APB buses clocks
+     */
+    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK |
+                                  RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+    RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+    RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-// 各硬件功能融合组成服务
-void on_time_service();
-// 用于解析串口命令
-void uart_data_paser();
-// 用于打包发送各种数据
-void uart_data_publisher();
+    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+    {
+        Error_Handler();
+    }
+}
 
-/*public*/
+void SysTick_Handler(void)
+{
+    HAL_IncTick();
+}
+
 void bsp_init()
 {
     return_code_t ret = RETURN_OK;
@@ -27,11 +52,13 @@ void bsp_init()
     led_init();
     // 蜂鸣器初始化
     beep_init();
-    // 运动控制初始化(包含了motor和encoder初始化)
-    ret = motion_init();
+    // motor初始化
+    motor_init();
+    // 编码器初始化
+    encoder_init();
 
     // icm20948初始化
-    ret = icm20948_init();
+    // ret = icm20948_init();
 
     // while (1)
     // {
@@ -48,129 +75,4 @@ void bsp_init()
     //     // }
     //     HAL_Delay(10);
     // }
-}
-void fast_on_time(uint16_t interval)
-{
-}
-
-void normal_on_time(uint16_t interval)
-{
-    // key1
-    key1_on_time(interval);
-    // led
-    led_on_time(interval);
-    // beep
-    beep_on_time(interval);
-    // motion
-    motion_on_time(interval);
-
-    // 服务
-    on_time_service();
-}
-
-void slow_on_time(uint16_t interval)
-{
-    // 电池周期函数
-    battery_on_time(interval);
-}
-
-void slowest_on_time(uint16_t interval)
-{
-    uint16_t v = battery_get_voltage();
-    // 打印
-    // printf("voltage:%d.%d\n", v / 1000, v % 1000);
-}
-
-/*实现 */
-void on_time_service()
-{
-    // 串口数据解析 收发数据
-    uart_data_paser();
-    uart_data_publisher();
-
-    // 按键key1短按、长按功能
-    static uint8_t last_key1_state = KEY1_RELEASE;
-    if (key1_get_state() == KEY1_PRESS)
-    {
-        // 检测为按下
-        beep_once(30);
-    }
-    else if (key1_get_state() == KEY1_LONG_PRESS && last_key1_state != KEY1_LONG_PRESS)
-    {
-        // 检测长按
-        led_flash_with_interval(10, 30);
-        led_keep_on();
-    }
-    last_key1_state = key1_get_state();
-}
-
-void uart_data_paser()
-{
-    uint8_t index = uart_buffer.head;
-    // uint16_t size = uart_buffer.size;
-    // 去除损坏帧
-    while (!(uart_buffer.data[index] == FRAME_HEAD1 &&
-             uart_buffer.data[uart_get_index(index + 1)] == FRAME_HEAD2) &&
-           uart_buffer.size > 0)
-    {
-        index = uart_get_index(index + 1);
-        uart_buffer.size--;
-    }
-    uart_buffer.head = index;
-    // 开始处理数据
-    while (uart_buffer.size >= MIN_FRAME_LENGTH)
-    {
-        // 包头比对
-        if (uart_buffer.data[index] == FRAME_HEAD1 &&
-            uart_buffer.data[uart_get_index(index + 1)] == FRAME_HEAD2)
-        {
-            // 帧长度
-            uint8_t frame_length = uart_buffer.data[uart_get_index(index + 2)] + FRAME_HEAD_LENGTH;
-            // 剩余数据不完整
-            if (uart_buffer.size < frame_length)
-                return;
-            // 获取功能字
-            uint8_t function = uart_buffer.data[uart_get_index(index + 3)];
-            // 校验和
-            if (enable_check_sum)
-            {
-            }
-
-            printf("frame_length: %d function: %d\n", frame_length, function);
-
-            switch (function)
-            {
-            case FRAME_FUNC_ENABLE_AUTO_SEND:
-                break;
-            case FRAME_FUNC_BEEP_ONCE:
-                beep_once(20);
-                break;
-            case FRAME_FUNC_LED_KEEP_ON:
-                led_keep_on();
-                break;
-            case FRAME_FUNC_LED_KEEP_OFF:
-                led_keep_off();
-                break;
-            case FRAME_FUNC_LED_FLASH:
-                led_flash_with_interval(10, 30);
-                break;
-            case FRAME_FUNC_MOTION:
-                uint8_t state = uart_buffer.data[uart_get_index(index + 4)]; // 运动状态
-                uint8_t speed = uart_buffer.data[uart_get_index(index + 5)]; // 速度
-                motion_parse_command(state, speed);
-                break;
-            }
-            uart_buffer.head = uart_get_index(uart_buffer.head + frame_length);
-            uart_buffer.size -= frame_length;
-        }
-
-        // printf("uart_buffer.size: %u\n", uart_buffer.size);
-        // printf("uart_buffer.head: %u\n", uart_buffer.head);
-        // printf("uart_buffer.tail: %u\n", uart_buffer.tail);
-    }
-}
-
-void uart_data_publisher()
-{
-    // printf("uart_buffer.size: %d\n", uart_buffer.size);
 }

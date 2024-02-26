@@ -1,6 +1,13 @@
 #include "main.h"
 
-uint16_t main_tick = 0;
+void Error_Handler(void)
+{
+    __disable_irq();
+    while (1)
+    {
+
+    }
+}
 
 int main(void)
 {
@@ -8,6 +15,7 @@ int main(void)
     SystemClock_Config(); // 初始化系统时钟
     bsp_init();           // 板载硬件初始化
 
+    uint16_t main_tick = 0; // 主循环计数器
     // beep_sound_start();
     led_flash(20);
     led_keep_on();
@@ -32,50 +40,32 @@ int main(void)
     // beep_sound_end();
 }
 
-void SystemClock_Config(void)
+void fast_on_time(uint16_t interval)
 {
-    RCC_OscInitTypeDef RCC_OscInitStruct = {0};
-    RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
-
-    /** Initializes the RCC Oscillators according to the specified parameters
-     * in the RCC_OscInitTypeDef structure.
-     */
-    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-    RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-    RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
-    RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-    RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
-    if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-    {
-        Error_Handler();
-    }
-
-    /** Initializes the CPU, AHB and APB buses clocks
-     */
-    RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK |
-                                  RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
-    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-    RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
-    RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
-
-    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
-    {
-        Error_Handler();
-    }
 }
 
-void SysTick_Handler(void)
+void normal_on_time(uint16_t interval)
 {
-    HAL_IncTick();
+    // key1
+    key1_on_time(interval);
+    // led
+    led_on_time(interval);
+    // beep
+    beep_on_time(interval);
+    // motion
+    motion_on_time(interval);
+    // protocol
+    service_protocol_on_time(interval);
 }
 
-void Error_Handler(void)
+void slow_on_time(uint16_t interval)
 {
-    __disable_irq();
-    while (1)
-    {
-    }
+    // 电池周期函数
+    service_battery_on_time(interval);
+}
+
+void slowest_on_time(uint16_t interval)
+{
+    uint16_t v = battery_get_voltage();
+    printf("voltage:%d.%d\n", v / 1000, v % 1000);
 }

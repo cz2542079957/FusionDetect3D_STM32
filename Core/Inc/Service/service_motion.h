@@ -22,9 +22,6 @@ typedef enum
     MOTION_TURN_BACK_LEFT,
 } Motion_State;
 
-// 初始化
-return_code_t motion_init();
-
 // 运动控制(速度值0-100)
 void motion_stop();                          // 停止
 void motion_go_forward(int16_t speed);       // 前进
