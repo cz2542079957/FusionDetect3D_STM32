@@ -70,16 +70,15 @@ void normal_on_time(uint16_t interval)
 
 void slow_on_time(uint16_t interval)
 {
-    // 电池电压
+    // 电池周期函数
     battery_on_time(interval);
-    printf("debug\n");
 }
 
 void slowest_on_time(uint16_t interval)
 {
     uint16_t v = battery_get_voltage();
     // 打印
-    printf("voltage:%d\n", v);
+    // printf("voltage:%d.%d\n", v / 1000, v % 1000);
 }
 
 /*实现 */
