@@ -1,7 +1,6 @@
 #pragma once
-#include "beep.h"
 #include "key1.h"
-#include "led.h"
+#include "steering_engine.h"
 #include "icm20948_api.h"
 
 #include "service_protocol.h"

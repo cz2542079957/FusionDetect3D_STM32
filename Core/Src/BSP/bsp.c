@@ -56,6 +56,10 @@ void bsp_init()
     motor_init();
     // 编码器初始化
     encoder_init();
+    // 舵机初始化
+    steering_engine_init();
+
+    steering_engine_set_angle(STEERING_ENGINE_1, 50);
 
     // icm20948初始化
     // ret = icm20948_init();

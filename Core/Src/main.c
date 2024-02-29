@@ -5,7 +5,6 @@ void Error_Handler(void)
     __disable_irq();
     while (1)
     {
-
     }
 }
 
@@ -42,6 +41,7 @@ int main(void)
 
 void fast_on_time(uint16_t interval)
 {
+    steering_engine_on_time(interval);
 }
 
 void normal_on_time(uint16_t interval)
