@@ -59,7 +59,8 @@ void bsp_init()
     // 舵机初始化
     steering_engine_init();
 
-    steering_engine_set_angle(STEERING_ENGINE_1, 50);
+    steering_engine_set_angle(STEERING_ENGINE_1, 0);
+    steering_engine_set_angle(STEERING_ENGINE_2, 0);
 
     // icm20948初始化
     // ret = icm20948_init();

@@ -2,12 +2,13 @@
  * @Author: cz2542079957 2542079957@qq.com
  * @Date: 2024-02-09 15:56:01
  * @LastEditors: cz2542079957 2542079957@qq.com
- * @LastEditTime: 2024-02-26 15:31:28
+ * @LastEditTime: 2024-03-27 14:48:09
  * @FilePath: /master/Core/Inc/main.h
  * @Description:
  *
- * Copyright (c) 2024 by ${git_name_email}, All Rights Reserved.
+ * Copyright (c) 2024 by 2542079957@qq.com, All Rights Reserved.
  */
+
 #pragma once
 #include "bsp.h"
 
@@ -22,7 +23,7 @@
 #define NORMAL_LOOP_CYCLE_TICKS 2     // 普通循环周期(主周期数)
 #define SLOW_LOOP_CYCLE_TICKS 20      // 慢速循环周期(主周期数)
 #define SLOWEST_LOOP_CYCLE_TICKS 1000 // 最慢循环周期(主周期数)
-// 快周期轮询
+                                      // 快周期轮询
 void fast_on_time(uint16_t interval);
 // 一般周期轮询
 void normal_on_time(uint16_t interval);

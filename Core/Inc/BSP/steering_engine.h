@@ -2,11 +2,9 @@
 #include "common.h"
 
 #define STEERING_ENGINE_PORT GPIOC
-
-// #define STEERING_ENGINE_1
+ 
 #define STEERING_ENGINE_1_PIN GPIO_PIN_3
-
-// #define STEERING_ENGINE_2
+ 
 #define STEERING_ENGINE_2_PIN GPIO_PIN_2
 
 typedef enum

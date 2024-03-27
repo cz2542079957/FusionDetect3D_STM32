@@ -39,12 +39,12 @@ int main(void)
     // beep_sound_end();
 }
 
-void fast_on_time(uint16_t interval)
+inline void fast_on_time(uint16_t interval)
 {
-    steering_engine_on_time(interval);
+    // steering_engine_on_time(interval);
 }
 
-void normal_on_time(uint16_t interval)
+inline void normal_on_time(uint16_t interval)
 {
     // key1
     key1_on_time(interval);
@@ -56,15 +56,17 @@ void normal_on_time(uint16_t interval)
     motion_on_time(interval);
     // protocol
     service_protocol_on_time(interval);
+
+    steering_engine_test();
 }
 
-void slow_on_time(uint16_t interval)
+inline void slow_on_time(uint16_t interval)
 {
     // 电池周期函数
     service_battery_on_time(interval);
 }
 
-void slowest_on_time(uint16_t interval)
+inline void slowest_on_time(uint16_t interval)
 {
     uint16_t v = battery_get_voltage();
     printf("voltage:%d.%d\n", v / 1000, v % 1000);
