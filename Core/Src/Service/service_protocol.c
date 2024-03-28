@@ -1,4 +1,7 @@
 #include "service_protocol.h"
+#include "service_motion.h"
+#include "beep.h"
+#include "led.h"
 
 /* private */
 int enable_check_sum = FRAME_ENABLE_CHECK_SUM; // 是否开启校验和

@@ -1,5 +1,6 @@
 #include "key1.h"
-#include "stdio.h"
+#include "beep.h"
+#include "led.h"
 
 /* private */
 

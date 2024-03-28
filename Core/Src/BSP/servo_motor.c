@@ -2,12 +2,13 @@
 
 TIM_HandleTypeDef htim6;
 
-uint16_t pwm_pulse = 0;                                         // 当前脉冲
-float target_angle[SERVO_MOTOR_NUMS] = {0};                     // 目标角度
-float current_angle[SERVO_MOTOR_NUMS] = {0};                    // 当前角度
-float target_pwm_width[SERVO_MOTOR_NUMS] = {50, 50};            // 目标占空比
-float pwm_width[SERVO_MOTOR_NUMS] = {50, 50};                   // 占空比
-float angle_pwm_scale_factor[SERVO_MOTOR_NUMS] = {7.40, 11.11}; // 角度占空比映射系数
+uint16_t pwm_pulse = 0;                                               // 当前脉冲
+float target_angle[SERVO_MOTOR_NUMS] = {0};                           // 目标角度
+float current_angle[SERVO_MOTOR_NUMS] = {0};                          // 当前角度
+float target_pwm_width[SERVO_MOTOR_NUMS] = {50, 50};                  // 目标占空比
+float pwm_width[SERVO_MOTOR_NUMS] = {50, 50};                         // 占空比
+float angle_pwm_scale_factor[SERVO_MOTOR_NUMS] = {7.40, 11.11};       // 角度占空比映射系数
+float pwm_acceleration[SERVO_MOTOR_NUMS] = {7.40 / 200, 11.11 / 200}; // pwm变化加速度
 
 void TIM6_IRQHandler(void)
 {
@@ -90,8 +91,8 @@ void servo_motor_set_all_angle(float angle)
 
 void servo_motor_on_time(uint16_t interval)
 {
-    float delta1 = interval * angle_pwm_scale_factor[SERVO_MOTOR_1] / 200,
-          delta2 = interval * angle_pwm_scale_factor[SERVO_MOTOR_2] / 200;
+    float delta1 = interval * pwm_acceleration[SERVO_MOTOR_1],
+          delta2 = interval * pwm_acceleration[SERVO_MOTOR_2];
     if (ABS(pwm_width[SERVO_MOTOR_1] - target_pwm_width[SERVO_MOTOR_1]) < delta1)
         pwm_width[SERVO_MOTOR_1] = target_pwm_width[SERVO_MOTOR_1];
     if (pwm_width[SERVO_MOTOR_1] < target_pwm_width[SERVO_MOTOR_1])
