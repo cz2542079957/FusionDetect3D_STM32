@@ -41,7 +41,6 @@ int main(void)
 
 inline void fast_on_time(uint16_t interval)
 {
-    // steering_engine_on_time(interval);
 }
 
 inline void normal_on_time(uint16_t interval)
@@ -54,10 +53,10 @@ inline void normal_on_time(uint16_t interval)
     beep_on_time(interval);
     // motion
     motion_on_time(interval);
+    // servo
+    servo_motor_on_time(interval);
     // protocol
     service_protocol_on_time(interval);
-
-    steering_engine_test();
 }
 
 inline void slow_on_time(uint16_t interval)

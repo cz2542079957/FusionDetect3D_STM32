@@ -2,7 +2,7 @@
  * @Author: cz2542079957 2542079957@qq.com
  * @Date: 2024-02-09 15:56:01
  * @LastEditors: cz2542079957 2542079957@qq.com
- * @LastEditTime: 2024-03-27 14:48:09
+ * @LastEditTime: 2024-03-28 10:17:54
  * @FilePath: /master/Core/Inc/main.h
  * @Description:
  *
@@ -17,7 +17,6 @@
  *      1.一般而言，越快的轮询中执行各种器件或者服务的on_time函数时，精度也会越高
  *      2.同时，大约每1次main轮询周期，会产生1ms的误差，因此在延迟函数中要减一，达到缓解误差的目的
  */
-
 #define MAIN_LOOP_CYCLE 5             // 主循环周期(MS)
 #define FAST_LOOP_CYCLE_TICKS 1       // 快速循环周期(主周期数)
 #define NORMAL_LOOP_CYCLE_TICKS 2     // 普通循环周期(主周期数)

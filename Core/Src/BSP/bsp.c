@@ -57,10 +57,10 @@ void bsp_init()
     // 编码器初始化
     encoder_init();
     // 舵机初始化
-    steering_engine_init();
+    servo_motor_init();
 
-    steering_engine_set_angle(STEERING_ENGINE_1, 0);
-    steering_engine_set_angle(STEERING_ENGINE_2, 0);
+    servo_motor_set_angle(SERVO_MOTOR_1, 120);
+    servo_motor_set_angle(SERVO_MOTOR_2, 50);
 
     // icm20948初始化
     // ret = icm20948_init();
