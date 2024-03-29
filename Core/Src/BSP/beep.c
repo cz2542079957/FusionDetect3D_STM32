@@ -49,7 +49,7 @@ void beep_once(int16_t time)
     beep_states_push(BEEP_STATE_ON, time);
     beep_states_push(BEEP_STATE_OFF, time);
 }
- 
+
 void beep_sound_start()
 {
     beep_once(200);

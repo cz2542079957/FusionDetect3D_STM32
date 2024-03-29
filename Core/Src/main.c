@@ -15,7 +15,7 @@ int main(void)
     bsp_init();           // 板载硬件初始化
 
     uint16_t main_tick = 0; // 主循环计数器
-    // beep_sound_start();
+    beep_sound_start();
     led_flash(20);
     led_keep_on();
     while (1)
@@ -54,7 +54,8 @@ inline void normal_on_time(uint16_t interval)
     // motion
     motion_on_time(interval);
     // servo
-    servo_motor_on_time(interval);
+    service_servo_on_time(interval);
+
     // protocol
     service_protocol_on_time(interval);
 }

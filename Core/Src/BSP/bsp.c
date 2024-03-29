@@ -57,10 +57,7 @@ void bsp_init()
     // 编码器初始化
     encoder_init();
     // 舵机初始化
-    servo_motor_init();
-
-    servo_motor_set_angle(SERVO_MOTOR_1, 120);
-    servo_motor_set_angle(SERVO_MOTOR_2, 50);
+    service_servo_init();
 
     // icm20948初始化
     // ret = icm20948_init();

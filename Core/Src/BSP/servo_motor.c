@@ -2,25 +2,20 @@
 
 TIM_HandleTypeDef htim6;
 
-uint16_t pwm_pulse = 0;                                               // 当前脉冲
-float target_angle[SERVO_MOTOR_NUMS] = {0};                           // 目标角度
-float current_angle[SERVO_MOTOR_NUMS] = {0};                          // 当前角度
-float target_pwm_width[SERVO_MOTOR_NUMS] = {50, 50};                  // 目标占空比
-float pwm_width[SERVO_MOTOR_NUMS] = {50, 50};                         // 占空比
-float angle_pwm_scale_factor[SERVO_MOTOR_NUMS] = {7.40, 11.11};       // 角度占空比映射系数
-float pwm_acceleration[SERVO_MOTOR_NUMS] = {7.40 / 200, 11.11 / 200}; // pwm变化加速度
+uint16_t pwm_pulse = 0;                                   // 当前脉冲
+float servo_motor_pwm_width[SERVO_MOTOR_NUMS] = {50, 50}; // 占空比
 
 void TIM6_IRQHandler(void)
 {
     __HAL_TIM_CLEAR_FLAG(&htim6, TIM_FLAG_UPDATE);
     pwm_pulse++;
     // printf("%u\n", g_pwm_pulse);
-    if (pwm_pulse <= pwm_width[SERVO_MOTOR_1])
+    if (pwm_pulse <= servo_motor_pwm_width[SERVO_MOTOR_1])
         HAL_GPIO_WritePin(SERVO_MOTOR_PORT, SERVO_MOTOR_1_PIN, GPIO_PIN_SET);
     else
         HAL_GPIO_WritePin(SERVO_MOTOR_PORT, SERVO_MOTOR_1_PIN, GPIO_PIN_RESET);
 
-    if (pwm_pulse <= pwm_width[SERVO_MOTOR_2])
+    if (pwm_pulse <= servo_motor_pwm_width[SERVO_MOTOR_2])
         HAL_GPIO_WritePin(SERVO_MOTOR_PORT, SERVO_MOTOR_2_PIN, GPIO_PIN_SET);
     else
         HAL_GPIO_WritePin(SERVO_MOTOR_PORT, SERVO_MOTOR_2_PIN, GPIO_PIN_RESET);
@@ -74,40 +69,4 @@ return_code_t servo_motor_init()
     }
 
     return RETURN_OK;
-}
-
-void servo_motor_set_angle(SERVO_MOTOR_ID id, float angle)
-{
-    target_angle[id] = angle;
-    target_pwm_width[id] = (angle * angle_pwm_scale_factor[id] + 500) / 10;
-    // printf("%u\n", g_angle_num[id]);
-}
-
-void servo_motor_set_all_angle(float angle)
-{
-    servo_motor_set_angle(SERVO_MOTOR_1, angle);
-    servo_motor_set_angle(SERVO_MOTOR_2, angle);
-}
-
-void servo_motor_on_time(uint16_t interval)
-{
-    float delta1 = interval * pwm_acceleration[SERVO_MOTOR_1],
-          delta2 = interval * pwm_acceleration[SERVO_MOTOR_2];
-    if (ABS(pwm_width[SERVO_MOTOR_1] - target_pwm_width[SERVO_MOTOR_1]) < delta1)
-        pwm_width[SERVO_MOTOR_1] = target_pwm_width[SERVO_MOTOR_1];
-    if (pwm_width[SERVO_MOTOR_1] < target_pwm_width[SERVO_MOTOR_1])
-        pwm_width[SERVO_MOTOR_1] += delta1;
-    else if (pwm_width[SERVO_MOTOR_1] > target_pwm_width[SERVO_MOTOR_1])
-        pwm_width[SERVO_MOTOR_1] -= delta1;
-
-    if (ABS(pwm_width[SERVO_MOTOR_2] - target_pwm_width[SERVO_MOTOR_2]) < delta2)
-        pwm_width[SERVO_MOTOR_2] = target_pwm_width[SERVO_MOTOR_2];
-    if (pwm_width[SERVO_MOTOR_2] < target_pwm_width[SERVO_MOTOR_2])
-        pwm_width[SERVO_MOTOR_2] += delta2;
-    else if (pwm_width[SERVO_MOTOR_2] > target_pwm_width[SERVO_MOTOR_2])
-        pwm_width[SERVO_MOTOR_2] -= delta2;
-
-    current_angle[SERVO_MOTOR_1] = (pwm_width[SERVO_MOTOR_1] * 10 - 500) / angle_pwm_scale_factor[SERVO_MOTOR_1];
-    current_angle[SERVO_MOTOR_2] = (pwm_width[SERVO_MOTOR_2] * 10 - 500) / angle_pwm_scale_factor[SERVO_MOTOR_2];
-    // printf("current_angle[SERVO_MOTOR_1] = %f\n", current_angle[SERVO_MOTOR_1]);
 }
