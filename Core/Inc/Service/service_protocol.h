@@ -18,6 +18,7 @@ typedef enum
     FRAME_FUNC_LED_KEEP_ON = 0x21,      // LED 常亮
     FRAME_FUNC_LED_KEEP_OFF = 0x22,     // LED 熄灭
     FRAME_FUNC_LED_FLASH = 0x23,        // LED 闪烁
+    FRAME_FUNC_AUTO_SCAN = 0X41,        // 自动扫描
     FRAME_FUNC_MOTION = 0x61,           // 小车运动控制
     FRAME_FUNC_ENCODER = 0X71,          // 编码器
 
@@ -25,10 +26,10 @@ typedef enum
 
 typedef enum
 {
-    FRAME_RESPONSE = 0xFFu,         // 指令应答帧
-    FRAME_RESPONSE_VOTAGE = 0xA1u,  // 电压信息帧
-    FRAME_RESPONSE_ENCODER = 0xB1u, // 编码器信息帧
-    FRAME_RESPONSE_SERVO = 0xC1u,   // 舵机信息帧
+    FRAME_RESPONSE = 0xFFU,         // 指令应答帧
+    FRAME_RESPONSE_VOTAGE = 0xA1U,  // 电压信息帧
+    FRAME_RESPONSE_ENCODER = 0xB1U, // 编码器信息帧
+    FRAME_RESPONSE_SERVO = 0xC1U,   // 舵机信息帧
 
 } Frame_Response;
 

@@ -1,4 +1,5 @@
 #include "service_protocol.h"
+#include "service_servo.h"
 #include "service_motion.h"
 #include "beep.h"
 #include "led.h"
@@ -58,6 +59,10 @@ void uart_data_paser()
                 break;
             case FRAME_FUNC_LED_FLASH:
                 led_flash_with_interval(10, 30);
+                break;
+            case FRAME_FUNC_AUTO_SCAN:
+                bool val = uart_buffer.data[uart_get_index(index + 4)] == 0x00 ? false : true;
+                service_servo_set_auto_scan(val);
                 break;
             case FRAME_FUNC_MOTION:
                 uint8_t state = uart_buffer.data[uart_get_index(index + 4)]; // 运动状态

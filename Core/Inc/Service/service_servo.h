@@ -24,7 +24,9 @@ void service_servo_set_angle_speed(SERVO_MOTOR_ID id, float angle, float speed);
 
 void service_servo_set_all_angle(float angle);
 
-float* service_servo_get_all_angle();
+float *service_servo_get_all_angle();
+
+void service_servo_set_auto_scan(bool val);
 
 /**
  * @description: 开机自检

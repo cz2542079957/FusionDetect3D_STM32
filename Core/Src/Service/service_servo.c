@@ -99,6 +99,16 @@ float *service_servo_get_all_angle()
     return current_angle;
 }
 
+void service_servo_set_auto_scan(bool val)
+{
+    if (auto_scan_mode ^ val)
+    {
+        while (servo_motor1_states_size > 0)
+            service_servo_pop_state(SERVO_MOTOR_1);
+    }
+    auto_scan_mode = val;
+}
+
 void service_servo_startup_check()
 {
     // service_servo_push_state(SERVO_MOTOR_1, 270, 5.0f);
