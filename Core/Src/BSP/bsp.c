@@ -58,23 +58,5 @@ void bsp_init()
     encoder_init();
     // 舵机初始化
     service_servo_init();
-
-    // icm20948初始化
-    // ret = icm20948_init();
-
-    // while (1)
-    // {
-    //     uint16_t count = icm20948_get_fifo_count();
-    //     // HAL_Delay(10);
-    //     // // uint8_t *data;
-    //     // // data = icm20948_read_fifo(count);
-    //     // uint8_t data1 = icm20948_read();
-    //     // HAL_Delay(10);
-    //     printf("debug:%d\n", count);
-    //     // if (count > 0)
-    //     // {
-    //     //     beep_once(10);
-    //     // }
-    //     HAL_Delay(10);
-    // }
+  
 }

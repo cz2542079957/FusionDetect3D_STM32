@@ -24,6 +24,17 @@ void service_servo_set_angle_speed(SERVO_MOTOR_ID id, float angle, float speed);
 
 void service_servo_set_all_angle(float angle);
 
+float* service_servo_get_all_angle();
+
+/**
+ * @description: 开机自检
+ * @return {*}
+ */
 void service_servo_startup_check();
 
+/**
+ * @description: 周期函数
+ * @param {uint16_t} interval
+ * @return {*}
+ */
 void service_servo_on_time(uint16_t interval);

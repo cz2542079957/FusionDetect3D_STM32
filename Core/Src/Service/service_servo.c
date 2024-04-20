@@ -11,7 +11,7 @@ uint8_t servo_motor1_states_head = 0, servo_motor2_states_head = 0;
 uint8_t servo_motor1_states_rear = -1, servo_motor2_states_rear = -1;
 uint8_t servo_motor1_states_size = 0, servo_motor2_states_size = 0;
 
-bool auto_scan_mode = true;      // 自动扫描模式
+bool auto_scan_mode = false;     // 自动扫描模式
 float scan_range_extend = 10.0f; // 扫描范围扩展
 
 void service_servo_push_state(SERVO_MOTOR_ID id, float angle, float speed)
@@ -94,13 +94,18 @@ void service_servo_set_all_angle(float angle)
     service_servo_set_angle(SERVO_MOTOR_2, angle);
 }
 
+float *service_servo_get_all_angle()
+{
+    return current_angle;
+}
+
 void service_servo_startup_check()
 {
-    service_servo_push_state(SERVO_MOTOR_1, 270, 5.0f);
-    service_servo_push_state(SERVO_MOTOR_2, 180, 4.0f);
+    // service_servo_push_state(SERVO_MOTOR_1, 270, 5.0f);
+    // service_servo_push_state(SERVO_MOTOR_2, 180, 4.0f);
 
-    service_servo_push_state(SERVO_MOTOR_1, 0, 4.0f);
-    service_servo_push_state(SERVO_MOTOR_2, 0, 3.0f);
+    // service_servo_push_state(SERVO_MOTOR_1, 0, 4.0f);
+    // service_servo_push_state(SERVO_MOTOR_2, 0, 3.0f);
 
     service_servo_push_state(SERVO_MOTOR_1, 90, 4.0f);
     service_servo_push_state(SERVO_MOTOR_2, 90, 3.0f);
@@ -110,6 +115,8 @@ void service_servo_on_time(uint16_t interval)
 {
     // 打印相关数据
     // printf("servo_motor1_states_size: %d\n", servo_motor1_states_size);
+
+    // 运动到指定角度
     if (servo_motor1_states_size > 0)
     {
         float delta1 = interval * pwm_acceleration[SERVO_MOTOR_1] * servo_motor1_states[servo_motor1_states_head].speed;
@@ -142,9 +149,12 @@ void service_servo_on_time(uint16_t interval)
                 servo_motor_pwm_width[SERVO_MOTOR_2] -= delta2;
         }
     }
+
+    // 更新当前角度
     current_angle[SERVO_MOTOR_1] = (servo_motor_pwm_width[SERVO_MOTOR_1] * 10 - 500) / angle_pwm_scale_factor[SERVO_MOTOR_1] - angle_bias[SERVO_MOTOR_1];
     current_angle[SERVO_MOTOR_2] = (servo_motor_pwm_width[SERVO_MOTOR_2] * 10 - 500) / angle_pwm_scale_factor[SERVO_MOTOR_2] - angle_bias[SERVO_MOTOR_2];
 
+    // 自动扫描模式
     if (auto_scan_mode && servo_motor1_states_size == 0)
     {
         service_servo_push_state(SERVO_MOTOR_1, -scan_range_extend, 1.0f);

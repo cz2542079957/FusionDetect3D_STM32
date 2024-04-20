@@ -293,7 +293,7 @@ void motion_on_time(uint16_t interval)
         current_motor_pulse[i] = new_pulse;
         motor_set_pwm(i, new_pulse);
     }
-    motion_closed_loop_control();
+    motion_closed_loop_control(); // 闭环控制
 }
 
 void motion_parse_command(Motion_State state, uint16_t speed)

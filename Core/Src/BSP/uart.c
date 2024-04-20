@@ -4,8 +4,7 @@
 /* private */
 UART_HandleTypeDef huart1;
 DMA_HandleTypeDef hdma_usart1_tx;
-
-struct Uart_Buffer uart_buffer; // 接收缓冲区
+uint8_t uart_it_buffer; // 中断接收缓冲区
 
 // 重定向printf
 int __io_putchar(int ch)
@@ -20,20 +19,34 @@ void USART1_IRQHandler(void)
     if ((__HAL_UART_GET_FLAG(&huart1, UART_FLAG_RXNE) != RESET) &&
         (__HAL_UART_GET_IT_SOURCE(&huart1, UART_IT_RXNE) != RESET))
     {
-        uint8_t temp = USART1->DR;
+        uint8_t temp = USART1->DR & 0xFF;
         uart_recv(temp);
-        HAL_UART_Receive_IT(&huart1, &temp, 1);
+        // printf("buffer: %u\n", temp);
+        // printf("%u\n", temp);
         __HAL_UART_CLEAR_FLAG(&huart1, UART_FLAG_RXNE);
     }
 }
 
-uint8_t uart_is_buffer_empty() { return uart_buffer.size == 0; }
+/*
+void DMA1_Channel4_IRQHandler(void)
+{
+    if ((__HAL_DMA_GET_FLAG(&hdma_usart1_tx, DMA_FLAG_TC4)) != RESET)
+    {
+        if (__HAL_DMA_GET_IT_SOURCE(&hdma_usart1_tx, DMA_IT_TC) != RESET)
+        {
+            __HAL_DMA_CLEAR_FLAG(&hdma_usart1_tx, DMA_FLAG_TC4);
+            __HAL_DMA_DISABLE_IT(&hdma_usart1_tx, DMA_IT_TC);
 
-uint8_t uart_is_buffer_full() { return uart_buffer.size >= (UART_BUFFER_SIZE - 1); }
+            // printf("123");
 
-uint16_t uart_get_index(uint16_t index) { return index % UART_BUFFER_SIZE; }
+            // 在这里处理接收到的数据，例如：
+            // ProcessReceivedData(uart_buffer.data, UART_BUFFER_SIZE);
+        }
+    }
+}
+*/
 
-#ifdef UART_ENABLE_DMA
+/*
 void uart_dma_init()
 {
     // USART1 DMA Init
@@ -49,14 +62,26 @@ void uart_dma_init()
     if (HAL_DMA_Init(&hdma_usart1_tx) != HAL_OK)
     {
     }
+
+    __HAL_LINKDMA(&huart1, hdmatx, hdma_usart1_tx);
+
     // 开启dma中断
     HAL_NVIC_SetPriority(DMA1_Channel4_IRQn, 1, 0);
     HAL_NVIC_EnableIRQ(DMA1_Channel4_IRQn);
-    // __HAL_LINKDMA(&huart1, hdmatx, hdma_usart1_tx);
+
+    // HAL_UART_Receive_DMA(&huart1, uart_dma_buffer, 5);
 }
-#endif
+ */
 
 /* public */
+
+struct Uart_Buffer uart_buffer; // 接收缓冲区
+
+uint8_t uart_is_buffer_empty() { return uart_buffer.size == 0; }
+
+uint8_t uart_is_buffer_full() { return uart_buffer.size >= (UART_BUFFER_SIZE - 1); }
+
+uint16_t uart_get_index(uint16_t index) { return index % UART_BUFFER_SIZE; }
 
 void uart_init()
 {
@@ -91,13 +116,10 @@ void uart_init()
     // 启动中断
     HAL_NVIC_SetPriority(USART1_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ(USART1_IRQn);
-    uint8_t rx_data;
-    HAL_UART_Receive_IT(&huart1, &rx_data, 1);
+    HAL_UART_Receive_IT(&huart1, &uart_it_buffer, 1);
 
-#ifdef UART_ENABLE_DMA
-    // 启动dma
-    uart_dma_init();
-#endif
+    // // 启动dma
+    // uart_dma_init();
 
     // 数据结构初始化
     memset(uart_buffer.data, 0, UART_BUFFER_SIZE);
@@ -112,12 +134,12 @@ void uart_recv(uint8_t data)
     if (!uart_is_buffer_full())
     {
         uart_buffer.data[uart_buffer.tail] = data;
-        uart_buffer.tail = (uart_buffer.tail + 1) % UART_BUFFER_SIZE;
+        uart_buffer.tail = uart_get_index(uart_buffer.tail + 1);
         uart_buffer.size++;
     }
 }
 
 void uart_send(uint8_t *data, uint16_t length)
 {
-    HAL_UART_Transmit_DMA(&huart1, data, length);
+    HAL_UART_Transmit(&huart1, data, length, 0xffff);
 }

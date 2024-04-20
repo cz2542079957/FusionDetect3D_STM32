@@ -9,9 +9,9 @@ int enable_check_sum = FRAME_ENABLE_CHECK_SUM; // 是否开启校验和
 // 用于解析串口命令
 void uart_data_paser()
 {
-    uint8_t index = uart_buffer.head;
-    // uint16_t size = uart_buffer.size;
+
     // 去除损坏帧
+    uint16_t index = uart_buffer.head;
     while (!(uart_buffer.data[index] == FRAME_HEAD1 &&
              uart_buffer.data[uart_get_index(index + 1)] == FRAME_HEAD2) &&
            uart_buffer.size > 0)
@@ -20,6 +20,7 @@ void uart_data_paser()
         uart_buffer.size--;
     }
     uart_buffer.head = index;
+
     // 开始处理数据
     while (uart_buffer.size >= MIN_FRAME_LENGTH)
     {
@@ -37,9 +38,10 @@ void uart_data_paser()
             // 校验和
             if (enable_check_sum)
             {
+                // 为了性能，默认正确
             }
 
-            printf("frame_length: %d function: %d\n", frame_length, function);
+            // printf("frame_length: %d function: %d\n", frame_length, function);
 
             switch (function)
             {
@@ -63,10 +65,9 @@ void uart_data_paser()
                 motion_parse_command(state, speed);
                 break;
             }
-            uart_buffer.head = uart_get_index(uart_buffer.head + frame_length);
+            uart_buffer.head = uart_get_index((uint16_t)(uart_buffer.head + frame_length));
             uart_buffer.size -= frame_length;
         }
-
         // printf("uart_buffer.size: %u\n", uart_buffer.size);
         // printf("uart_buffer.head: %u\n", uart_buffer.head);
         // printf("uart_buffer.tail: %u\n", uart_buffer.tail);
@@ -83,5 +84,22 @@ void uart_data_publisher()
 void service_protocol_on_time(uint16_t interval)
 {
     uart_data_paser();
-    uart_data_publisher();
+    // uart_data_publisher();
+}
+
+void service_protocol_send_frame(uint8_t *data, uint16_t length)
+{
+    uint16_t frame_length = FRAME_HEAD_LENGTH + length + 1;
+    uint8_t frame[frame_length];
+    frame[0] = FRAME_HEAD1;
+    frame[1] = FRAME_HEAD2;
+    frame[2] = length + 1;
+    uint8_t check_sum = 0;
+    for (uint8_t i = 0; i < length; i++)
+    {
+        frame[i + FRAME_HEAD_LENGTH] = data[i];
+        check_sum += data[i];
+    }
+    frame[frame_length - 1] = check_sum & 0xFF;
+    uart_send(frame, frame_length);
 }

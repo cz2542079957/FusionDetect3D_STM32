@@ -9,7 +9,7 @@
 #define BAUDRATE 115200 // 波特率
 
 /* 循环数组 */
-#define UART_BUFFER_SIZE 4098u
+#define UART_BUFFER_SIZE 1024u
 struct Uart_Buffer
 {
     uint8_t data[UART_BUFFER_SIZE];
