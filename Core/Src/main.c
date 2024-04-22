@@ -47,10 +47,10 @@ inline void fast_on_time(uint16_t interval)
     service_protocol_send_frame(encoder_frame, 5);
 
     // 发出舵机数据
-    float *servo = service_servo_get_all_angle();
-    uint16_t servo1 = servo[0] * 10, servo2 = servo[1] * 10;
-    uint8_t servo_frame[5] = {FRAME_RESPONSE_SERVO, (uint8_t)(servo1 & 0xff), (uint8_t)(servo1 >> 8), (uint8_t)(servo2 & 0xff), (uint8_t)(servo2 >> 8)}; 
-    service_protocol_send_frame(servo_frame, 5);
+    // float *servo = service_servo_get_all_angle();
+    // uint16_t servo1 = servo[0] * 10, servo2 = servo[1] * 10;
+    // uint8_t servo_frame[5] = {FRAME_RESPONSE_SERVO, (uint8_t)(servo1 & 0xff), (uint8_t)(servo1 >> 8), (uint8_t)(servo2 & 0xff), (uint8_t)(servo2 >> 8)}; 
+    // service_protocol_send_frame(servo_frame, 5);
 }
 
 inline void normal_on_time(uint16_t interval)

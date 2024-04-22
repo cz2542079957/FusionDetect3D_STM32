@@ -1,8 +1,8 @@
 #include "service_servo.h"
 
 float current_angle[SERVO_MOTOR_NUMS] = {0, 0};
-float angle_bias[SERVO_MOTOR_NUMS] = {33.0, -8.0};
-float angle_pwm_scale_factor[SERVO_MOTOR_NUMS] = {7.40, 11.11};       // 角度占空比映射系数
+float angle_bias[SERVO_MOTOR_NUMS] = {36.0, -8.0};
+float angle_pwm_scale_factor[SERVO_MOTOR_NUMS] = {7.35, 11.11};       // 角度占空比映射系数
 float pwm_acceleration[SERVO_MOTOR_NUMS] = {7.40 / 200, 11.11 / 200}; // pwm变化加速度
 
 struct Servo_Motor_States servo_motor1_states[MAX_SERVO_MOTOR_STATES]; // 舵机1状态
@@ -11,8 +11,8 @@ uint8_t servo_motor1_states_head = 0, servo_motor2_states_head = 0;
 uint8_t servo_motor1_states_rear = -1, servo_motor2_states_rear = -1;
 uint8_t servo_motor1_states_size = 0, servo_motor2_states_size = 0;
 
-bool auto_scan_mode = false;     // 自动扫描模式
-float scan_range_extend = 10.0f; // 扫描范围扩展
+bool auto_scan_mode = false;    // 自动扫描模式
+float scan_range_extend = 0.0f; // 扫描范围扩展
 
 void service_servo_push_state(SERVO_MOTOR_ID id, float angle, float speed)
 {
@@ -117,8 +117,11 @@ void service_servo_startup_check()
     // service_servo_push_state(SERVO_MOTOR_1, 0, 4.0f);
     // service_servo_push_state(SERVO_MOTOR_2, 0, 3.0f);
 
-    service_servo_push_state(SERVO_MOTOR_1, 90, 4.0f);
-    service_servo_push_state(SERVO_MOTOR_2, 90, 3.0f);
+    service_servo_push_state(SERVO_MOTOR_1, 90, 2.0f);
+    service_servo_push_state(SERVO_MOTOR_2, 90, 1.5f);
+
+    // service_servo_push_state(SERVO_MOTOR_1, 0, 2.0f);
+    // service_servo_push_state(SERVO_MOTOR_1, 180, 2.0f);
 }
 
 void service_servo_on_time(uint16_t interval)
@@ -160,15 +163,15 @@ void service_servo_on_time(uint16_t interval)
         }
     }
 
-    // 更新当前角度
-    current_angle[SERVO_MOTOR_1] = (servo_motor_pwm_width[SERVO_MOTOR_1] * 10 - 500) / angle_pwm_scale_factor[SERVO_MOTOR_1] - angle_bias[SERVO_MOTOR_1];
-    current_angle[SERVO_MOTOR_2] = (servo_motor_pwm_width[SERVO_MOTOR_2] * 10 - 500) / angle_pwm_scale_factor[SERVO_MOTOR_2] - angle_bias[SERVO_MOTOR_2];
+    // 更新当前角度 放弃使用该数据
+    // current_angle[SERVO_MOTOR_1] = (servo_motor_pwm_width[SERVO_MOTOR_1] * 10 - 500) / angle_pwm_scale_factor[SERVO_MOTOR_1] - angle_bias[SERVO_MOTOR_1];
+    // current_angle[SERVO_MOTOR_2] = (servo_motor_pwm_width[SERVO_MOTOR_2] * 10 - 500) / angle_pwm_scale_factor[SERVO_MOTOR_2] - angle_bias[SERVO_MOTOR_2];
 
     // 自动扫描模式
     if (auto_scan_mode && servo_motor1_states_size == 0)
     {
-        service_servo_push_state(SERVO_MOTOR_1, -scan_range_extend, 1.0f);
-        service_servo_push_state(SERVO_MOTOR_1, 180 + scan_range_extend, 1.0f);
+        service_servo_push_state(SERVO_MOTOR_1, -scan_range_extend, 0.5f);
+        service_servo_push_state(SERVO_MOTOR_1, 180 + scan_range_extend, 0.5f);
     }
     // printf("current: %f %f\n", current_angle[SERVO_MOTOR_1], current_angle[SERVO_MOTOR_2]);
 }
