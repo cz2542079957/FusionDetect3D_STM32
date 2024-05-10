@@ -11,8 +11,8 @@ uint8_t servo_motor1_states_head = 0, servo_motor2_states_head = 0;
 uint8_t servo_motor1_states_rear = -1, servo_motor2_states_rear = -1;
 uint8_t servo_motor1_states_size = 0, servo_motor2_states_size = 0;
 
-bool auto_scan_mode = false;    // 自动扫描模式
-float scan_range_extend = 0.0f; // 扫描范围扩展
+bool auto_scan_mode = false;     // 自动扫描模式
+float scan_range_extend = 12.0f; // 扫描范围扩展
 
 void service_servo_push_state(SERVO_MOTOR_ID id, float angle, float speed)
 {
@@ -117,10 +117,9 @@ void service_servo_startup_check()
     // service_servo_push_state(SERVO_MOTOR_1, 0, 4.0f);
     // service_servo_push_state(SERVO_MOTOR_2, 0, 3.0f);
 
-    service_servo_push_state(SERVO_MOTOR_1, 90, 2.0f);
-    service_servo_push_state(SERVO_MOTOR_2, 90, 1.5f);
+    service_servo_push_state(SERVO_MOTOR_1, 90, 1.0f);
+    service_servo_push_state(SERVO_MOTOR_2, 88, 1.0f);
 
-    // service_servo_push_state(SERVO_MOTOR_1, 0, 2.0f);
     // service_servo_push_state(SERVO_MOTOR_1, 180, 2.0f);
 }
 
@@ -170,8 +169,12 @@ void service_servo_on_time(uint16_t interval)
     // 自动扫描模式
     if (auto_scan_mode && servo_motor1_states_size == 0)
     {
-        service_servo_push_state(SERVO_MOTOR_1, -scan_range_extend, 0.5f);
-        service_servo_push_state(SERVO_MOTOR_1, 180 + scan_range_extend, 0.5f);
+        service_servo_push_state(SERVO_MOTOR_1, 0, 1.0f);
+        service_servo_push_state(SERVO_MOTOR_1, 180 + scan_range_extend, 0.38f);
+        service_servo_push_state(SERVO_MOTOR_1, scan_range_extend, 3.0f);
+        service_servo_push_state(SERVO_MOTOR_1, 0, 1.0f);
+        service_servo_push_state(SERVO_MOTOR_1, 180 + scan_range_extend, 0.42f);
+        service_servo_push_state(SERVO_MOTOR_1, scan_range_extend, 3.0f);
     }
     // printf("current: %f %f\n", current_angle[SERVO_MOTOR_1], current_angle[SERVO_MOTOR_2]);
 }

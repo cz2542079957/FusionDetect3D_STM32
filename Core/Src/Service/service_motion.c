@@ -317,16 +317,16 @@ void motion_parse_command(Motion_State state, uint16_t speed)
         motion_go_right(speed);
         break;
     case MOTION_FRONT_RIGHT:
-        motion_turn_front_right(speed);
+        motion_go_front_right(speed);
         break;
     case MOTION_FRONT_LEFT:
-        motion_turn_front_left(speed);
+        motion_go_front_left(speed);
         break;
     case MOTION_BACK_RIGHT:
-        motion_turn_back_right(speed);
+        motion_go_back_right(speed);
         break;
     case MOTION_BACK_LEFT:
-        motion_turn_back_left(speed);
+        motion_go_back_left(speed);
         break;
     case MOTION_TURN_LEFT:
         motion_turn_left(speed);
